@@ -169,3 +169,18 @@ vm.runInContext('route()', context);
 assert.ok(main.innerHTML.includes('示例文章'));
 assert.ok(main.innerHTML.includes('class="toc"'));
 console.log('PASS: real essay has 10 complete paragraphs and no sample notice; sample articles retain notices and TOC.');
+
+const selfEssay = context.window.SAMPLE.articles.find(a => a.id === 'i-am-good-because-i-am-me');
+assert.ok(selfEssay);
+assert.equal(selfEssay.title, '我很好，因为我就是我');
+assert.equal(selfEssay.category, '思考与记录');
+assert.equal(selfEssay.date, '2026.10.09');
+assert.equal(selfEssay.sample, false);
+assert.equal(selfEssay.paragraphs.length, 6);
+assert.equal(selfEssay.paragraphs.at(-1), '我们并不需要在所有方面都耀眼，才配得上喜欢自己。承认不足，然后继续生长；看见他人，也不遗失自己的步伐。所谓“我很好”，不是说我已经无可挑剔，而是说，即使此刻仍有缺憾、仍在前行，我也愿意尊重这个独一无二的自己。因为我不是任何标签的总和，我就是我。');
+context.location.hash = '#/writing/' + selfEssay.id;
+vm.runInContext('route()', context);
+for (const paragraph of selfEssay.paragraphs) assert.ok(main.innerHTML.includes(paragraph));
+assert.ok(!main.innerHTML.includes('示例文章'));
+assert.ok(!main.innerHTML.includes('class="toc"'));
+console.log('PASS: self-acceptance essay has 6 complete paragraphs and no sample notice.');
