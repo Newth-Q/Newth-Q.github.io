@@ -209,3 +209,9 @@ assert.ok(finalHtml.includes('<p class="footer-title">很高兴，在这里遇�
 assert.ok(finalHtml.includes('关于我 ↗'));
 assert.ok(!finalHtml.includes('关于这个小站'));
 console.log('PASS: homepage caps articles at 3, notes at 2, and removes visible sample/footer-link copy.');
+
+
+const latestCss = fs.readFileSync(path.join(root, 'styles.css'), 'utf8');
+assert.ok(latestCss.includes('.full-notes{width:min(100%,720px);max-width:720px;'));
+assert.ok(finalHtml.includes('styles.css?v=notes-column-720'));
+console.log('PASS: notes list has an explicit 720px maximum reading column and cache-busted stylesheet.');
