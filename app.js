@@ -29,10 +29,15 @@ function awardsContent(){
   const years=[...new Set(awards.map(item=>item.year))].sort((a,b)=>b-a);
   return `<div class="profile-section"><h2 class="profile-heading">奖项与荣誉</h2><div class="awards-years">${years.map(year=>`<section class="award-year" aria-label="${year} 年奖项与荣誉"><div class="award-year-label"><time datetime="${year}">${year}</time></div><ul class="award-list">${awards.filter(item=>item.year===year).map(item=>`<li><span>${esc(item.title)}</span>${item.team?'<span class="profile-badge">团队荣誉</span>':''}</li>`).join('')}</ul></section>`).join('')}</div></div>`;
 }
+function publicationsContent(){
+  const papers=[...window.PUBLICATIONS].sort((a,b)=>b.year-a.year);
+  return `<div class="profile-section"><h2 class="profile-heading">出版物</h2><ul class="publication-list">${papers.map(p=>`<li class="publication-row"><time class="publication-year" datetime="${p.year}">${p.year}</time><div class="publication-body"><h3>${esc(p.title)}</h3><a class="publication-pdf" href="${esc(p.pdf)}" target="_blank" rel="noopener noreferrer" aria-label="阅读论文 PDF：${esc(p.title)}（新窗口）">PDF ↗</a></div><span class="publication-venue">${esc(p.venue)}</span></li>`).join('')}</ul></div>`;
+}
 const aboutTabItems = [
   {id:'intro', label:'自我介绍'},
   {id:'experience', label:'经历'},
   {id:'awards', label:'奖项'},
+  {id:'publications', label:'出版物'},
 ];
 function about(){return intro('ABOUT / 关于','一份慢慢写下的自我介绍。','')+`<div class="about-tabs" role="tablist" aria-label="关于我的不同方面">${aboutTabItems.map((tab,i)=>`<button type="button" role="tab" id="about-tab-${tab.id}" class="about-tab" data-about-tab="${tab.id}" aria-controls="about-panel-${tab.id}" aria-selected="${i===0}" tabindex="${i===0?'0':'-1'}">${tab.label}</button>`).join('')}</div><div class="about-content"><section id="about-panel-intro" role="tabpanel" aria-labelledby="about-tab-intro" tabindex="0"><article class="prose">
 <h2>你好，我是梁琪。</h2>
@@ -64,6 +69,7 @@ function about(){return intro('ABOUT / 关于','一份慢慢写下的自我介�
 </article></section>
 <section id="about-panel-experience" role="tabpanel" aria-labelledby="about-tab-experience" tabindex="0" hidden>${experienceContent()}</section>
 <section id="about-panel-awards" role="tabpanel" aria-labelledby="about-tab-awards" tabindex="0" hidden>${awardsContent()}</section>
+<section id="about-panel-publications" role="tabpanel" aria-labelledby="about-tab-publications" tabindex="0" hidden>${publicationsContent()}</section>
 </div>`}
 function selectAboutTab(id, moveFocus=false) {
   if (!aboutTabItems.some(tab=>tab.id===id)) return;

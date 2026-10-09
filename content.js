@@ -83,3 +83,31 @@ window.PROFILE = {
     {year:2018, title:'湖北省暑期社会实践项目优秀大学生志愿者团队', team:true},
   ],
 };
+
+// 出版信息核对自论文PDF首页；VLDB使用正式出版版本。
+window.PUBLICATIONS = [
+  {
+    "year": 2026,
+    "title": "Efficient Simple Temporal Cycle Enumeration on Large Graphs with Lightweight Preprocessing",
+    "venue": "KDD",
+    "pdf": "assets/publications/kdd-2026-temporal-cycles.pdf"
+  },
+  {
+    "year": 2024,
+    "title": "Efficient Regular Simple Path Queries under Transitive Restricted Expressions",
+    "venue": "PVLDB / VLDB",
+    "pdf": "assets/publications/vldb-2024-regular-simple-paths.pdf"
+  },
+  {
+    "year": 2023,
+    "title": "Finding Introverted Cores in Bipartite Graphs",
+    "venue": "WISA",
+    "pdf": "assets/publications/wisa-2023-introverted-cores.pdf"
+  },
+  {
+    "year": 2023,
+    "title": "Efficient and Effective Directed Minimum Spanning Tree Queries",
+    "venue": "Mathematics",
+    "pdf": "assets/publications/mathematics-2023-directed-mst.pdf"
+  }
+];

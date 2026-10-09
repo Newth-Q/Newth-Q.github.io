@@ -58,7 +58,7 @@ for (const text of [
 for (const text of ['这里将放置你的故事', 'about-card', '不必一次介绍完整', '你会在这里读到什么', '此页面为介绍文案的占位样本', '你的名字']) {
   assert.ok(!main.innerHTML.includes(text), 'Removed about text: ' + text);
 }
-assert.equal((main.innerHTML.match(/<h3>/g) || []).length, 4, 'Biography has four stages');
+assert.equal((main.innerHTML.split('</article></section>')[0].match(/<h3>/g) || []).length, 4, 'Biography has four stages');
 assert.ok(main.innerHTML.includes('更像是一个审核者和搬运者'));
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 assert.ok(html.includes('© 2026 Qi'));
@@ -90,14 +90,14 @@ console.log(`PASS: ${cases.length} route cases, HTML escaping, personal biograph
 // About tab markup defaults to the original biography on each route render.
 context.location.hash = '#/about';
 vm.runInContext('route()', context);
-assert.equal((main.innerHTML.match(/role="tab" /g) || []).length, 3);
+assert.equal((main.innerHTML.match(/role="tab" /g) || []).length, 4);
 assert.ok(/id="about-tab-intro"[^>]*aria-selected="true"/.test(main.innerHTML));
-for (const id of ['experience', 'awards']) {
+for (const id of ['experience', 'awards', 'publications']) {
   assert.ok(new RegExp(`id="about-panel-${id}"[^>]* hidden`).test(main.innerHTML));
 }
 const originalQuery = context.document.querySelectorAll;
 const originalGet = context.document.getElementById;
-const panels = Object.fromEntries(['intro', 'experience', 'awards'].map(id => [id, {hidden:id !== 'intro'}]));
+const panels = Object.fromEntries(['intro', 'experience', 'awards', 'publications'].map(id => [id, {hidden:id !== 'intro'}]));
 const buttons = Object.keys(panels).map(id => ({
   dataset: {aboutTab:id}, attributes:{}, tabIndex:0, focused:false,
   setAttribute(name,value) { this.attributes[name] = value; },
@@ -105,7 +105,7 @@ const buttons = Object.keys(panels).map(id => ({
 }));
 context.document.querySelectorAll = selector => selector === '[data-about-tab]' ? buttons : [];
 context.document.getElementById = id => id.startsWith('about-panel-') ? panels[id.slice(12)] : originalGet(id);
-for (const selected of ['experience', 'awards', 'intro']) {
+for (const selected of ['experience', 'awards', 'publications', 'intro']) {
   vm.runInContext(`selectAboutTab('${selected}', true)`, context);
   for (const button of buttons) {
     const active = button.dataset.aboutTab === selected;
@@ -212,6 +212,21 @@ console.log('PASS: homepage caps articles at 3, notes at 2, and removes visible 
 
 
 const latestCss = fs.readFileSync(path.join(root, 'styles.css'), 'utf8');
-assert.ok(latestCss.includes('.full-notes{width:min(100%,720px);max-width:720px;'));
-assert.ok(finalHtml.includes('styles.css?v=notes-column-720'));
-console.log('PASS: notes list has an explicit 720px maximum reading column and cache-busted stylesheet.');
+assert.ok(latestCss.includes('.full-notes{width:100%;max-width:none;'));
+assert.ok(finalHtml.includes('styles.css?v=notes-container-1'));
+console.log('PASS: notes list is fluid-width with a cache-busted stylesheet.');
+
+const publications = context.window.PUBLICATIONS;
+assert.equal(publications.length, 4);
+const publicationMarkup = vm.runInContext('publicationsContent()', context);
+assert.deepEqual(Array.from(publicationMarkup.matchAll(/datetime="(\d{4})"/g), m => m[1]), ['2026','2024','2023','2023']);
+for (const paper of publications) {
+  assert.ok(publicationMarkup.includes(paper.title));
+  assert.ok(publicationMarkup.includes(paper.venue));
+  assert.ok(fs.existsSync(path.join(root, paper.pdf)));
+}
+assert.ok(!publications.some(p => p.pdf.includes('Github_VLDB')));
+console.log('PASS: 4 unique publications, descending years, PDF links and file existence.');
+
+assert.ok(latestCss.includes("main{max-width:1120px;"));
+assert.ok(!latestCss.includes("main:has(.full-notes)"));
