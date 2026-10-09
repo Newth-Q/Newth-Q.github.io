@@ -4,8 +4,8 @@
 
 ## 访问与维护
 
-- 仓库：https://github.com/Newth-Q/AboutMe
-- 网站：https://newth-q.github.io/AboutMe/
+- 仓库：https://github.com/Newth-Q/Newth-Q.github.io
+- 网站：https://newth-q.github.io/
 - 发布方式：GitHub Pages 从 `main` 分支的根目录发布，`.nojekyll` 禁用 Jekyll 处理。
 - 日常流程：本地修改 → 预览和测试 → 提交 → 推送到 `main` → 等待 Pages 更新。
 
@@ -72,7 +72,7 @@ Agent 代为提交时按 Proma 规则追加 `Made-with: Proma` trailer；用户�
 
 ## 新增图片与隐私边界
 
-公开图片放在 `assets/`，使用 `assets/example.jpg` 这样的相对链接，以兼容 `/AboutMe/` 子路径。
+公开图片放在 `assets/`，使用 `assets/example.jpg` 这样的相对链接，兼容本地预览与当前根域名部署。
 
 **仓库是公开的，Pages 也从仓库根目录发布。所有提交的文件均应视为公开，包括源码、README 和测试。** 不要提交私人笔记、草稿、账号凭据、个人配置或整个 Obsidian Vault。忽略规则不能保护已跟踪文件，也不能撤回既有公开历史。误提交密钥应立即撤销密钥，而不是仅删除文件。
 
