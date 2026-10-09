@@ -55,3 +55,7 @@ body.dark .theme .theme-sun{display:block}
 .award-list li{font-size:16px;line-height:1.9;padding:5px 0}
 .award-list li:first-child{padding-top:0}
 @media(max-width:600px){.profile-heading{font-size:22px}.education-item{grid-template-columns:1fr;gap:3px;padding-bottom:24px}.education-school{font-size:17px}.education-period{font-size:12px}.service-list li,.award-list li{font-size:15px}.award-year{grid-template-columns:48px 1fr;gap:15px}.award-year-label{font-size:18px}.profile-badge{margin-left:8px}}
+
+/* Essays without section headings do not reserve an empty table-of-contents column. */
+.article-layout.article-layout-plain{display:block}
+.article-layout-plain>.prose{width:100%;min-width:0}

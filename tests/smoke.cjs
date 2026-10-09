@@ -150,3 +150,22 @@ assert.deepEqual(Array.from(awardsMarkup.matchAll(/datetime="(\d{4})"/g), m => m
 assert.ok(experienceMarkup.includes('至今'));
 assert.ok(!main.innerHTML.includes('这部分内容将在之后补充'));
 console.log('PASS: 4 education records, 6 activities, 11 awards, updated titles, 2 team honors and year ordering.');
+
+const essay = context.window.SAMPLE.articles.find(a => a.id === 'sudongpo-finding-peace-in-contradictions');
+assert.ok(essay);
+assert.equal(essay.title, '在矛盾中安顿自己——读郭宝平《苏东坡》有感');
+assert.equal(essay.category, '读书随笔');
+assert.equal(essay.date, '2026.10.09');
+assert.equal(essay.sample, false);
+assert.equal(essay.paragraphs.length, 10);
+assert.equal(essay.paragraphs.at(-1), '这或许就是今天的我，从一个真实而矛盾的苏东坡身上得到的最大安慰。');
+context.location.hash = '#/writing/' + essay.id;
+vm.runInContext('route()', context);
+for (const paragraph of essay.paragraphs) assert.ok(main.innerHTML.includes(paragraph));
+assert.ok(!main.innerHTML.includes('示例文章'));
+assert.ok(!main.innerHTML.includes('class="toc"'));
+context.location.hash = '#/writing/a-place-for-thoughts';
+vm.runInContext('route()', context);
+assert.ok(main.innerHTML.includes('示例文章'));
+assert.ok(main.innerHTML.includes('class="toc"'));
+console.log('PASS: real essay has 10 complete paragraphs and no sample notice; sample articles retain notices and TOC.');
