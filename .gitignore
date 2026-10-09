@@ -1,0 +1,24 @@
+# Local settings and secrets
+.DS_Store
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Dependencies and generated files
+node_modules/
+_site/
+dist/
+coverage/
+
+# Local drafts and session material (never publish)
+.context/
+private/
+drafts/
+
+# Local design explorations; not part of the published website
+generated-images/
+
+# Reserved local workflow; Pages currently deploys directly from main
+.github/workflows/pages.yml
