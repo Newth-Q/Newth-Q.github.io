@@ -156,7 +156,6 @@ assert.ok(essay);
 assert.equal(essay.title, '在矛盾中安顿自己——读郭宝平《苏东坡》有感');
 assert.equal(essay.category, '读书随笔');
 assert.equal(essay.date, '2026.10.09');
-assert.equal(essay.sample, false);
 assert.equal(essay.paragraphs.length, 10);
 assert.equal(essay.paragraphs.at(-1), '这或许就是今天的我，从一个真实而矛盾的苏东坡身上得到的最大安慰。');
 context.location.hash = '#/writing/' + essay.id;
@@ -164,18 +163,19 @@ vm.runInContext('route()', context);
 for (const paragraph of essay.paragraphs) assert.ok(main.innerHTML.includes(paragraph));
 assert.ok(!main.innerHTML.includes('示例文章'));
 assert.ok(!main.innerHTML.includes('class="toc"'));
-context.location.hash = '#/writing/a-place-for-thoughts';
-vm.runInContext('route()', context);
-assert.ok(main.innerHTML.includes('示例文章'));
-assert.ok(main.innerHTML.includes('class="toc"'));
-console.log('PASS: real essay has 10 complete paragraphs and no sample notice; sample articles retain notices and TOC.');
+assert.equal(context.window.SAMPLE.articles.length, 2);
+for (const removedId of ['a-place-for-thoughts', 'tools-and-attention', 'walking-without-a-goal']) {
+  context.location.hash = '#/writing/' + removedId;
+  vm.runInContext('route()', context);
+  assert.ok(main.innerHTML.includes('404'));
+}
+console.log('PASS: two real articles have no sample notices; three removed sample routes return 404.');
 
 const selfEssay = context.window.SAMPLE.articles.find(a => a.id === 'i-am-good-because-i-am-me');
 assert.ok(selfEssay);
 assert.equal(selfEssay.title, '我很好，因为我就是我');
 assert.equal(selfEssay.category, '思考与记录');
 assert.equal(selfEssay.date, '2026.10.09');
-assert.equal(selfEssay.sample, false);
 assert.equal(selfEssay.paragraphs.length, 6);
 assert.equal(selfEssay.paragraphs.at(-1), '我们并不需要在所有方面都耀眼，才配得上喜欢自己。承认不足，然后继续生长；看见他人，也不遗失自己的步伐。所谓“我很好”，不是说我已经无可挑剔，而是说，即使此刻仍有缺憾、仍在前行，我也愿意尊重这个独一无二的自己。因为我不是任何标签的总和，我就是我。');
 context.location.hash = '#/writing/' + selfEssay.id;
@@ -184,3 +184,28 @@ for (const paragraph of selfEssay.paragraphs) assert.ok(main.innerHTML.includes(
 assert.ok(!main.innerHTML.includes('示例文章'));
 assert.ok(!main.innerHTML.includes('class="toc"'));
 console.log('PASS: self-acceptance essay has 6 complete paragraphs and no sample notice.');
+
+// Homepage never renders more than three articles, but makes extra content discoverable.
+const articleData = context.window.SAMPLE.articles;
+const temporaryArticles = [
+  {id:'temporary-1',category:'测试',date:'2026.10.10',minutes:1,title:'临时文章一',intro:'仅用于首页容量测试。',sample:false,paragraphs:['一']},
+  {id:'temporary-2',category:'测试',date:'2026.10.11',minutes:1,title:'临时文章二',intro:'仅用于首页容量测试。',sample:false,paragraphs:['二']},
+];
+articleData.push(...temporaryArticles);
+const homeWithFive = vm.runInContext('home()', context);
+assert.equal((homeWithFive.match(/class="writing-row"/g) || []).length, 3);
+assert.ok(homeWithFive.includes('查看全部文章（共 4 篇）'));
+assert.ok(!homeWithFive.includes('临时文章二'));
+articleData.splice(-temporaryArticles.length, temporaryArticles.length);
+const homeWithTwo = vm.runInContext('home()', context);
+assert.equal((homeWithTwo.match(/class="writing-row"/g) || []).length, 2);
+assert.ok(homeWithTwo.includes('全部文章'));
+assert.ok(!homeWithTwo.includes('查看全部文章（共'));
+assert.equal((homeWithTwo.match(/class="note"/g) || []).length, 2);
+assert.ok(!homeWithTwo.includes('文字持续更新，部分栏目暂保留示例内容。'));
+assert.ok(!homeWithTwo.includes('示例关注主题'));
+const finalHtml = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+assert.ok(finalHtml.includes('<p class="footer-title">很高兴，在这里遇见你。</p>'));
+assert.ok(finalHtml.includes('关于我 ↗'));
+assert.ok(!finalHtml.includes('关于这个小站'));
+console.log('PASS: homepage caps articles at 3, notes at 2, and removes visible sample/footer-link copy.');
