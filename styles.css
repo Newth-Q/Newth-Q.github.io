@@ -2,7 +2,7 @@
 @media(min-width:601px) and (max-width:800px){.hero{gap:28px;grid-template-columns:1.2fr 1fr}.journal{padding:20px;min-height:295px}.journal-center p{font-size:20px}.journal-top{font-size:8px;letter-spacing:1px;gap:8px}.journal-top span{white-space:nowrap}.journal-bottom{font-size:8px;gap:8px}.hero-description{font-size:12px}.hero h1{font-size:38px}}
 
 /* About page: a single readable column after removing the sample sidebar. */
-.about-content{max-width:740px;padding:15px 0 60px}
+.about-content{width:100%;max-width:none;min-width:0;padding:15px 0 60px}
 @media(max-width:600px){.about-content{padding:0 0 30px}}
 
 /* The icon indicates the theme available on click. */
@@ -23,7 +23,7 @@ body.dark .theme .theme-sun{display:block}
 @media(max-width:600px){.about-content .prose h3{font-size:21px;margin-top:32px}}
 
 /* About tabs: local content switching with visible selection and keyboard focus. */
-.about-tabs{display:flex;gap:28px;max-width:740px;border-bottom:1px solid var(--line);margin:0 0 26px}
+.about-tabs{display:flex;gap:28px;width:100%;border-bottom:1px solid var(--line);margin:0 0 26px}
 .about-tab{font:inherit;font-size:15px;border:0;border-bottom:2px solid transparent;padding:10px 2px 12px;background:none;color:var(--muted);margin-bottom:-1px;white-space:nowrap}
 .about-tab[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent)}
 .about-tab:hover{color:var(--accent)}
