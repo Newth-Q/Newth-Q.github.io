@@ -20,7 +20,7 @@ vm.createContext(context);
 for (const name of ['content.js', 'app.js']) vm.runInContext(fs.readFileSync(path.join(root, name), 'utf8'), context);
 const cases = [
   ['#/', '认真生活'], ['#/writing', '把想法'],
-  ['#/notes', '未完成'], ['#/notes/0', '包括制作这个网站'],
+  ['#/notes', '未完成'], ['#/notes/0', '明确自己要玩什么游戏'],
   ['#/projects', '动手试试'], ['#/about', '自我介绍'],
   ...context.window.SAMPLE.articles.map(a => ['#/writing/' + a.id, a.title]),
   ...context.window.SAMPLE.projects.map(p => ['#/projects/' + p.id, p.title]),
@@ -231,6 +231,10 @@ console.log('PASS: 4 unique publications, descending years, PDF links and file e
 assert.ok(latestCss.includes("main{max-width:1120px;"));
 assert.ok(!latestCss.includes("main:has(.full-notes)"));
 
-assert.equal(context.window.SAMPLE.notes[0].text, '尽管AI的出现和发展，使我对科研的兴趣寥寥，但不得不承认，AI的的确确将我从繁杂的科研任务中解放出来，使我在不影响科研工作进度的情况下，有更多的时间专注于自己感兴趣的事情——包括制作这个网站。');
-assert.equal(context.window.SAMPLE.notes[0].date, "10.09");
+assert.equal(context.window.SAMPLE.notes.find(n => n.tag === "AI与科研之外的生活").text, '尽管AI的出现和发展，使我对科研的兴趣寥寥，但不得不承认，AI的的确确将我从繁杂的科研任务中解放出来，使我在不影响科研工作进度的情况下，有更多的时间专注于自己感兴趣的事情——包括制作这个网站。');
+assert.equal(context.window.SAMPLE.notes.find(n => n.tag === "AI与科研之外的生活").date, "10.09");
 console.log("PASS: latest AI note preserves original text and date.");
+
+assert.equal(context.window.SAMPLE.notes[0].text, '尽可能努力明确自己要玩什么游戏。这件事情的重点在于，让你可以不受其他人的影响，因为你们玩的不是同一款游戏。就我而言，如果我要玩“高校老师”游戏，那我就不得不加入“卷论文”大军；但如果我玩的只是“博士毕业”游戏，我就可以更好安排自己的生活，而无需在乎其他人发了多少文章。');
+assert.equal(context.window.SAMPLE.notes[0].date, "10.10");
+console.log("PASS: latest game note preserves original text and date.");
