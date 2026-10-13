@@ -213,7 +213,7 @@ console.log('PASS: homepage caps articles at 3, notes at 2, and removes visible 
 
 const latestCss = fs.readFileSync(path.join(root, 'styles.css'), 'utf8');
 assert.ok(latestCss.includes('.full-notes{width:100%;max-width:none;'));
-assert.ok(finalHtml.includes('styles.css?v=note-poem-1'));
+assert.ok(finalHtml.includes('styles.css?v=now-height-1'));
 console.log('PASS: notes list is fluid-width with a cache-busted stylesheet.');
 
 const publications = context.window.PUBLICATIONS;
@@ -366,3 +366,6 @@ vm.runInContext("route()",context);
 for (const p of respectEssay.paragraphs) assert.ok(main.innerHTML.includes(p));
 assert.ok(main.innerHTML.includes("2024.01.25"));
 console.log("PASS: respect essay preserves six original paragraphs and 2024.01.25 date.");
+
+assert.ok(latestCss.includes(".now{align-self:start;background:var(--surface);padding:25px 28px;"));
+console.log("PASS: focus card aligns to start with content-driven height and retained padding.");
