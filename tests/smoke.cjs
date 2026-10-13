@@ -20,7 +20,7 @@ vm.createContext(context);
 for (const name of ['content.js', 'app.js']) vm.runInContext(fs.readFileSync(path.join(root, name), 'utf8'), context);
 const cases = [
   ['#/', '认真生活'], ['#/writing', '把想法'],
-  ['#/notes', '未完成'], ['#/notes/0', '财富带给你的最大幸福感'],
+  ['#/notes', '未完成'], ['#/notes/0', '制度必须与人事相配合'],
   ['#/projects', '动手试试'], ['#/about', '自我介绍'],
   ...context.window.SAMPLE.articles.map(a => ['#/writing/' + a.id, a.title]),
   ...context.window.SAMPLE.projects.map(p => ['#/projects/' + p.id, p.title]),
@@ -239,6 +239,16 @@ assert.equal(context.window.SAMPLE.notes.find(n => n.tag === "明确自己的游
 assert.equal(context.window.SAMPLE.notes.find(n => n.tag === "明确自己的游戏").date, "10.10");
 console.log("PASS: latest game note preserves original text and date.");
 
-assert.equal(context.window.SAMPLE.notes[0].text, '财富带给你的最大幸福感是，极大地提升了你对自己生活的掌握度——每天早上醒来，都可以决定你要如何度过这一天。');
-assert.equal(context.window.SAMPLE.notes[0].date, "10.10");
+assert.equal(context.window.SAMPLE.notes.find(n => n.tag === "财富与生活的自主权").text, '财富带给你的最大幸福感是，极大地提升了你对自己生活的掌握度——每天早上醒来，都可以决定你要如何度过这一天。');
+assert.equal(context.window.SAMPLE.notes.find(n => n.tag === "财富与生活的自主权").date, "10.10");
 console.log("PASS: latest wealth note preserves original text and date.");
+
+const readingNotes = [{"date": "10.13", "tag": "制度与人事", "text": "制度必须与人事相配合。辛亥革命前后，人人言变法，太重视了制度，好像只要建立制度，一切人事自会随制度转变。首先，要讲一代的制度，必先精熟一代的人事。若离开人事单来看制度，则制度只是一条条的条文，似乎枯燥乏味，无可讲。而且已经明日黄花，也不必讲。"}, {"date": "10.13", "tag": "中国的红色政权为什么能够存在？", "text": "中国白色政权的分裂和战争是持续不断的，则红色政权的发生、存在并且日益发展，便是无疑的了。————《中国的红色政权为什么能够存在？》"}, {"date": "10.13", "tag": "置身事内：担当与容错", "text": "但在尚未完成转型之前，习惯了旧有工作方式的地方官员在反腐高压之下难免变得瞻前顾后、畏首畏尾。2016年，中央开始强调“庸政懒政怠政也是一种腐败”，要破除“为官不为”。2018年，中国中央办公厅引发《关于进一步激励广大干部新时代新担当新作为的意见》，强调建立健全容错机制，宽容干部在改革创新中的失误错误，把干部在推进改革中因缺乏经验、先行先试的失误错误同明知故犯的违纪违法行为区分开来；把尚无明确限制的探索性实验中的失误错误，同明令禁止后依旧我行我素的违纪违法行为区分开来；把为推动发展的无意过失，同为谋取私利的违纪违法行为区分开来。这些措施如何落到实处，还有待观察。————《置身事内》"}];
+for (const [i, note] of readingNotes.entries()) {
+  assert.equal(context.window.SAMPLE.notes[i].text, note.text);
+  assert.equal(context.window.SAMPLE.notes[i].date, note.date);
+  context.location.hash = "#/notes/" + i;
+  vm.runInContext("route()", context);
+  assert.ok(main.innerHTML.includes(note.text));
+}
+console.log("PASS: three October 13 reading notes preserve original text, dates and render on detail routes.");
