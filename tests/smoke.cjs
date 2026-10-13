@@ -20,7 +20,7 @@ vm.createContext(context);
 for (const name of ['content.js', 'app.js']) vm.runInContext(fs.readFileSync(path.join(root, name), 'utf8'), context);
 const cases = [
   ['#/', '认真生活'], ['#/writing', '把想法'],
-  ['#/notes', '未完成'], ['#/notes/0', '制度必须与人事相配合'],
+  ['#/notes', '未完成'], ['#/notes/0', '若是一个人'],
   ['#/projects', '动手试试'], ['#/about', '自我介绍'],
   ...context.window.SAMPLE.articles.map(a => ['#/writing/' + a.id, a.title]),
   ...context.window.SAMPLE.projects.map(p => ['#/projects/' + p.id, p.title]),
@@ -213,7 +213,7 @@ console.log('PASS: homepage caps articles at 3, notes at 2, and removes visible 
 
 const latestCss = fs.readFileSync(path.join(root, 'styles.css'), 'utf8');
 assert.ok(latestCss.includes('.full-notes{width:100%;max-width:none;'));
-assert.ok(finalHtml.includes('styles.css?v=note-dates-2'));
+assert.ok(finalHtml.includes('styles.css?v=note-poem-1'));
 console.log('PASS: notes list is fluid-width with a cache-busted stylesheet.');
 
 const publications = context.window.PUBLICATIONS;
@@ -244,7 +244,8 @@ assert.equal(context.window.SAMPLE.notes.find(n => n.tag === "财富与生活的
 console.log("PASS: latest wealth note preserves original text and date.");
 
 const readingNotes = [{"date": "10.13", "tag": "制度与人事", "text": "制度必须与人事相配合。辛亥革命前后，人人言变法，太重视了制度，好像只要建立制度，一切人事自会随制度转变。首先，要讲一代的制度，必先精熟一代的人事。若离开人事单来看制度，则制度只是一条条的条文，似乎枯燥乏味，无可讲。而且已经明日黄花，也不必讲。"}, {"date": "10.13", "tag": "中国的红色政权为什么能够存在？", "text": "中国白色政权的分裂和战争是持续不断的，则红色政权的发生、存在并且日益发展，便是无疑的了。————《中国的红色政权为什么能够存在？》"}, {"date": "10.13", "tag": "置身事内：担当与容错", "text": "但在尚未完成转型之前，习惯了旧有工作方式的地方官员在反腐高压之下难免变得瞻前顾后、畏首畏尾。2016年，中央开始强调“庸政懒政怠政也是一种腐败”，要破除“为官不为”。2018年，中国中央办公厅引发《关于进一步激励广大干部新时代新担当新作为的意见》，强调建立健全容错机制，宽容干部在改革创新中的失误错误，把干部在推进改革中因缺乏经验、先行先试的失误错误同明知故犯的违纪违法行为区分开来；把尚无明确限制的探索性实验中的失误错误，同明令禁止后依旧我行我素的违纪违法行为区分开来；把为推动发展的无意过失，同为谋取私利的违纪违法行为区分开来。这些措施如何落到实处，还有待观察。————《置身事内》"}];
-for (const [i, note] of readingNotes.entries()) {
+for (const note of readingNotes) {
+  const i = context.window.SAMPLE.notes.findIndex(n => n.tag === note.tag);
   assert.equal(context.window.SAMPLE.notes[i].text, note.text);
   assert.equal(context.window.SAMPLE.notes[i].date, note.date);
   context.location.hash = "#/notes/" + i;
@@ -300,3 +301,15 @@ for (const p of revolutionOriginal) assert.ok(main.innerHTML.includes(p));
 assert.ok(main.innerHTML.includes("2024.12.14"));
 assert.deepEqual(Array.from(context.window.SAMPLE.articles,a=>a.date),["2026.10.09","2026.10.09","2024.12.14","2024.02.18"]);
 console.log("PASS: revolution essay preserves original text, specified date and article date order.");
+
+const poemOriginal = "终身浪漫的开始，\n\n对我而言，\n\n也许不是心有所属，两情相悦，\n\n这固然令人羡慕，\n\n但爱自己，爱生活，\n\n如此便是一个人，亦是良辰美景，\n\n爱自己才是终身浪漫的开始。";
+assert.equal(allNotes[0].tag,"若是一个人");
+assert.equal(allNotes[0].text,poemOriginal);
+assert.equal(vm.runInContext("noteDate(notes[0])",context),"2026.10.13");
+assert.equal(allNotes[0].text.split("\n\n").length,7);
+context.location.hash = "#/notes/0";
+vm.runInContext("route()",context);
+assert.ok(main.innerHTML.includes(poemOriginal));
+assert.ok(main.innerHTML.includes('<blockquote class="note-text">'));
+assert.ok(latestCss.includes(".note-text{white-space:pre-wrap}"));
+console.log("PASS: poem preserves seven lines, paragraph breaks and 2026.10.13 date.");

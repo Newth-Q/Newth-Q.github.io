@@ -72,3 +72,5 @@ body.dark .theme .theme-sun{display:block}
 /* Full dates remain on one line in home and notes lists. */
 .note,.full-notes .note{grid-template-columns:80px minmax(0,1fr)}
 .note-date{white-space:nowrap}
+
+.note-text{white-space:pre-wrap}
