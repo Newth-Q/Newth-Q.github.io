@@ -68,3 +68,7 @@ body.dark .theme .theme-sun{display:block}
 .publication-body h3{font-size:19px;line-height:1.6;font-weight:500;margin:0;overflow-wrap:anywhere}
 .publication-pdf{display:inline-block;margin-top:12px;color:var(--green);font-size:14px}
 @media(max-width:640px){.publication-row{grid-template-columns:48px minmax(0,1fr);gap:10px 16px;padding:22px 0}.publication-body h3{font-size:17px}.publication-venue{grid-column:2}.about-tabs{flex-wrap:wrap}}
+
+/* Full dates remain on one line in home and notes lists. */
+.note,.full-notes .note{grid-template-columns:80px minmax(0,1fr)}
+.note-date{white-space:nowrap}

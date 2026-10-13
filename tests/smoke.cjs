@@ -163,13 +163,13 @@ vm.runInContext('route()', context);
 for (const paragraph of essay.paragraphs) assert.ok(main.innerHTML.includes(paragraph));
 assert.ok(!main.innerHTML.includes('示例文章'));
 assert.ok(!main.innerHTML.includes('class="toc"'));
-assert.equal(context.window.SAMPLE.articles.length, 3);
+assert.equal(context.window.SAMPLE.articles.length, 4);
 for (const removedId of ['a-place-for-thoughts', 'tools-and-attention', 'walking-without-a-goal']) {
   context.location.hash = '#/writing/' + removedId;
   vm.runInContext('route()', context);
   assert.ok(main.innerHTML.includes('404'));
 }
-console.log('PASS: three real articles have no sample notices; three removed sample routes return 404.');
+console.log('PASS: four real articles have no sample notices; three removed sample routes return 404.');
 
 const selfEssay = context.window.SAMPLE.articles.find(a => a.id === 'i-am-good-because-i-am-me');
 assert.ok(selfEssay);
@@ -194,13 +194,13 @@ const temporaryArticles = [
 articleData.push(...temporaryArticles);
 const homeWithFive = vm.runInContext('home()', context);
 assert.equal((homeWithFive.match(/class="writing-row"/g) || []).length, 3);
-assert.ok(homeWithFive.includes('查看全部文章（共 5 篇）'));
+assert.ok(homeWithFive.includes('查看全部文章（共 6 篇）'));
 assert.ok(!homeWithFive.includes('临时文章二'));
 articleData.splice(-temporaryArticles.length, temporaryArticles.length);
 const homeWithThree = vm.runInContext('home()', context);
 assert.equal((homeWithThree.match(/class="writing-row"/g) || []).length, 3);
 assert.ok(homeWithThree.includes('全部文章'));
-assert.ok(!homeWithThree.includes('查看全部文章（共'));
+assert.ok(homeWithThree.includes('查看全部文章（共 4 篇）'));
 assert.equal((homeWithThree.match(/class="note"/g) || []).length, 2);
 assert.ok(!homeWithThree.includes('文字持续更新，部分栏目暂保留示例内容。'));
 assert.ok(!homeWithThree.includes('示例关注主题'));
@@ -213,7 +213,7 @@ console.log('PASS: homepage caps articles at 3, notes at 2, and removes visible 
 
 const latestCss = fs.readFileSync(path.join(root, 'styles.css'), 'utf8');
 assert.ok(latestCss.includes('.full-notes{width:100%;max-width:none;'));
-assert.ok(finalHtml.includes('styles.css?v=notes-container-1'));
+assert.ok(finalHtml.includes('styles.css?v=note-dates-2'));
 console.log('PASS: notes list is fluid-width with a cache-busted stylesheet.');
 
 const publications = context.window.PUBLICATIONS;
@@ -276,5 +276,27 @@ for (const [offset, expected] of grassrootsOriginal.entries()) {
   assert.ok(main.innerHTML.includes("2024.11.05"));
   assert.ok(!main.innerHTML.includes("2026.11.05"));
 }
-assert.ok(vm.runInContext("noteCard(notes.at(-1),notes.length-1)",context).includes("2024<br>11.05"));
+assert.ok(vm.runInContext("noteCard(notes.at(-1),notes.length-1)",context).includes("2024.11.05"));
 console.log("PASS: six historical notes preserve original paragraphs, order and 2024.11.05 dates.");
+
+for (let i=0;i<allNotes.length;i++) {
+  const expectedDate = `${allNotes[i].year || 2026}.${allNotes[i].date}`;
+  assert.match(expectedDate, /^\d{4}\.\d{2}\.\d{2}$/);
+  assert.ok(vm.runInContext(`noteCard(notes[${i}],${i})`,context).includes(`class="note-date">${expectedDate}</span>`));
+  context.location.hash = "#/notes/" + i;
+  vm.runInContext("route()",context);
+  assert.ok(main.innerHTML.includes(expectedDate));
+}
+console.log("PASS: every note card and detail uses YYYY.MM.DD dates.");
+
+const revolutionEssay = context.window.SAMPLE.articles.find(a => a.id === "china-revolution-leadership");
+assert.equal(revolutionEssay.title, "为什么说只有中国共产党才能领导中国取得革命胜利？");
+assert.equal(revolutionEssay.date,"2024.12.14");
+const revolutionOriginal = ["一个考研政治近代史纲要部分中经常出现的问题，我听到的最多的一个答案是，自近代以来，无数先烈试图救亡中国，例如洋务运动、戊戌变法、辛亥革命等，但他们均以失败告终。只有中国共产党领导下的革命战争取得了胜利，因此说只有中国共产党才能领导中国取得革命胜利。虽然我考研政治的答卷上也写了类似的答案，但一直以来有一个问题在困扰我，即如果说是历史结果证明了，只有中国共产党才能领导中国取得革命胜利，那么当初的投身于共产主义事业的先辈们，又是靠着什么坚信只有中国共产党才能领导中国，只有社会主义才能救中国这一理想信念，并愿意为之付出生命的代价呢？他们并没有看到未来，甚至在那个时候，中国共产党领导的工农红军在反动势力面前显得如此不堪一击。这背后一定有更深层的原因，也正是基于这样深层次的原因，才让他们坚信，只有中国共产党能。", "近代的中国，半殖民地半封建社会，总的来看有三座大山：帝国主义、封建主义和官僚资本主义。自一九二四年开始的革命战争直到一九四五年抗日战争的结束，中华民族的主要敌人，是帝国主义和封建主义；而自一九四五年开始至一九四九年新中国成立，中国革命战争的主要敌人，是官僚资本主义。在前一个阶段，首先可以排除的封建势力和帝国主义来领导中国的革命战争；中国资产阶级，是在一定程度上参与了中国革命战争，也是我们要团结的对象之一，因为我们的主要敌人是帝国主义和封建主义。但他们能不能当领导者呢？不能的，因为它的自私自利性和政治上经济上的缺乏独立性，不愿意也不能领导中国革命战争走上彻底胜利的道路。中国农民群众和城市小资产阶级群众？他们可以说是，愿意积极参加革命战争，因为帝国主义和封建主义对他们的生活造成了极大的破坏，他们是革命的主力军，但是他们的小生产的特点，使他们的政治眼光受到限制（一部分失业群众则具有无政府思想），所以他们不能成为战争的正确的领导者。因此，在无产阶级已经走上政治舞台的时代，中国革命战争的领导责任，就不得不落到中国共产党的肩上。在这种时候，任何的革命战争如果没有或违背无产阶级和共产党的领导，那个战争是一定要失败的。因为半殖民地的中国的社会各阶层和各种政治集团中，只有无产阶级和共产党，才最没有狭隘性和自私自利性，最有远大的政治眼光和最有组织性，而且也最能虚心地接受世界上先进的无产阶级及其政党的经验而用之于自己的事业。因此，只有无产阶级和共产党能够领导农民、城市小资产阶级和资产阶级，克服农民和小资产阶级的狭隘性，克服失业者群的破坏性，并且还能够克服资产阶级的动摇和不彻底性（如果共产党的政策不犯错误的话），而使革命和战争走上胜利的道路。"];
+assert.equal(JSON.stringify(revolutionEssay.paragraphs),JSON.stringify(revolutionOriginal));
+context.location.hash = "#/writing/china-revolution-leadership";
+vm.runInContext("route()",context);
+for (const p of revolutionOriginal) assert.ok(main.innerHTML.includes(p));
+assert.ok(main.innerHTML.includes("2024.12.14"));
+assert.deepEqual(Array.from(context.window.SAMPLE.articles,a=>a.date),["2026.10.09","2026.10.09","2024.12.14","2024.02.18"]);
+console.log("PASS: revolution essay preserves original text, specified date and article date order.");
