@@ -15,9 +15,8 @@ function home(){
 function writing(){return intro('WRITING / 文章','把想法，慢慢写清楚。','一些关于工具、生活与个人成长的记录。不追求每篇都有答案，只希望每次多理解一点。')+`<div class="filters" role="group" aria-label="按主题筛选文章">${['全部',...new Set(articles.map(a=>a.category))].map((t,i)=>`<button class="filter ${i===0?'active':''}" aria-pressed="${i===0}" data-filter="${esc(t)}">${esc(t)}</button>`).join('')}</div><div class="listing" id="article-list">${articles.map(articleRow).join('')}</div>`}
 function article(a){
   const sections=a.sections||[];
-  const body=Array.isArray(a.paragraphs)
-    ? a.paragraphs.map(p=>`<p>${esc(p)}</p>`).join('')
-    : sections.map((s,i)=>`<section id="section-${i}"><h2>${esc(s[0])}</h2>${s.slice(1).map(p=>`<p>${esc(p)}</p>`).join('')}</section>`).join('');
+  const body=(Array.isArray(a.paragraphs) ? a.paragraphs.map(p=>`<p>${esc(p)}</p>`).join('') : '')
+    + sections.map((s,i)=>`<section id="section-${i}"><h2>${esc(s[0])}</h2>${s.slice(1).map(p=>`<p>${esc(p)}</p>`).join('')}</section>`).join('');
   const toc=sections.length?`<aside class="toc"><span class="eyebrow">ON THIS PAGE</span>${sections.map((s,i)=>`<a href="#section-${i}" data-section="section-${i}">${String(i+1).padStart(2,'0')}　${esc(s[0])}</a>`).join('')}</aside>`:'';
   return `<div class="article-header"><a class="back" href="#/writing">← 返回文章</a><h1>${esc(a.title)}</h1><div class="meta"><span class="category">${esc(a.category)}</span>${a.author?`<span>${esc(a.author)}</span>`:''}<span>${esc(a.date)}</span><span>约 ${a.minutes} 分钟</span></div><p class="article-deck">${esc(a.intro)}</p></div><div class="article-layout${sections.length?'':' article-layout-plain'}"><article class="prose">${body}<div class="article-end"><span>感谢读到这里。</span><a href="#/writing">继续阅读 ↗</a></div></article>${toc}</div>`;
 }

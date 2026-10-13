@@ -163,13 +163,13 @@ vm.runInContext('route()', context);
 for (const paragraph of essay.paragraphs) assert.ok(main.innerHTML.includes(paragraph));
 assert.ok(!main.innerHTML.includes('示例文章'));
 assert.ok(!main.innerHTML.includes('class="toc"'));
-assert.equal(context.window.SAMPLE.articles.length, 5);
+assert.equal(context.window.SAMPLE.articles.length, 6);
 for (const removedId of ['a-place-for-thoughts', 'tools-and-attention', 'walking-without-a-goal']) {
   context.location.hash = '#/writing/' + removedId;
   vm.runInContext('route()', context);
   assert.ok(main.innerHTML.includes('404'));
 }
-console.log('PASS: five real articles have no sample notices; three removed sample routes return 404.');
+console.log('PASS: six real articles have no sample notices; three removed sample routes return 404.');
 
 const selfEssay = context.window.SAMPLE.articles.find(a => a.id === 'i-am-good-because-i-am-me');
 assert.ok(selfEssay);
@@ -194,13 +194,13 @@ const temporaryArticles = [
 articleData.push(...temporaryArticles);
 const homeWithFive = vm.runInContext('home()', context);
 assert.equal((homeWithFive.match(/class="writing-row"/g) || []).length, 3);
-assert.ok(homeWithFive.includes('查看全部文章（共 7 篇）'));
+assert.ok(homeWithFive.includes('查看全部文章（共 8 篇）'));
 assert.ok(!homeWithFive.includes('临时文章二'));
 articleData.splice(-temporaryArticles.length, temporaryArticles.length);
 const homeWithThree = vm.runInContext('home()', context);
 assert.equal((homeWithThree.match(/class="writing-row"/g) || []).length, 3);
 assert.ok(homeWithThree.includes('全部文章'));
-assert.ok(homeWithThree.includes('查看全部文章（共 5 篇）'));
+assert.ok(homeWithThree.includes('查看全部文章（共 6 篇）'));
 assert.equal((homeWithThree.match(/class="note"/g) || []).length, 2);
 assert.ok(!homeWithThree.includes('文字持续更新，部分栏目暂保留示例内容。'));
 assert.ok(!homeWithThree.includes('示例关注主题'));
@@ -299,7 +299,7 @@ context.location.hash = "#/writing/china-revolution-leadership";
 vm.runInContext("route()",context);
 for (const p of revolutionOriginal) assert.ok(main.innerHTML.includes(p));
 assert.ok(main.innerHTML.includes("2024.12.14"));
-assert.deepEqual(Array.from(context.window.SAMPLE.articles,a=>a.date),["2026.10.09","2026.10.09","2024.12.14","2024.07.28","2024.02.18"]);
+assert.deepEqual(Array.from(context.window.SAMPLE.articles,a=>a.date),["2026.10.09","2026.10.09","2024.12.14","2024.07.28","2024.07.17","2024.02.18"]);
 console.log("PASS: revolution essay preserves original text, specified date and article date order.");
 
 const poemOriginal = "终身浪漫的开始，\n\n对我而言，\n\n也许不是心有所属，两情相悦，\n\n这固然令人羡慕，\n\n但爱自己，爱生活，\n\n如此便是一个人，亦是良辰美景，\n\n爱自己才是终身浪漫的开始。";
@@ -336,3 +336,23 @@ context.location.hash = "#/notes/0";
 vm.runInContext("route()",context);
 assert.ok(main.innerHTML.includes(prosperityText));
 console.log("PASS: common prosperity is one note with six original paragraphs and correct date.");
+
+const drivingEssay = context.window.SAMPLE.articles.find(a=>a.id === "autonomous-driving-and-drivers");
+assert.equal(drivingEssay.title,"自动驾驶取代网约车司机？");
+assert.equal(drivingEssay.date,"2024.07.17");
+assert.equal(drivingEssay.paragraphs.length,7);
+assert.equal(drivingEssay.sections.length,2);
+const drivingParts = ["# "+drivingEssay.title,...drivingEssay.paragraphs,...drivingEssay.sections.flatMap(s=>["### "+s[0],...s.slice(1)])];
+assert.equal(require("node:crypto").createHash("sha256").update(drivingParts.join("\n\n")).digest("hex"),"1acf9fff83ff1a8c65d0fea8ead7223bff69a1d65fd98373d95a10682d8ca3b6");
+context.location.hash = "#/writing/autonomous-driving-and-drivers";
+vm.runInContext("route()",context);
+const drivingBody = [...drivingEssay.paragraphs,...drivingEssay.sections.flat()];
+let previous = main.innerHTML.indexOf('<article class="prose">');
+for (const text of drivingBody) {
+  const position = main.innerHTML.indexOf(text, previous);
+  assert.ok(position > previous);
+  previous = position;
+}
+assert.ok(main.innerHTML.includes("2024.07.17"));
+assert.equal((main.innerHTML.match(/data-section="section-/g)||[]).length,2);
+console.log("PASS: driving essay preserves all original paragraphs and headings, with date 2024.07.17.");
