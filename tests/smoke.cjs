@@ -163,13 +163,13 @@ vm.runInContext('route()', context);
 for (const paragraph of essay.paragraphs) assert.ok(main.innerHTML.includes(paragraph));
 assert.ok(!main.innerHTML.includes('示例文章'));
 assert.ok(!main.innerHTML.includes('class="toc"'));
-assert.equal(context.window.SAMPLE.articles.length, 4);
+assert.equal(context.window.SAMPLE.articles.length, 5);
 for (const removedId of ['a-place-for-thoughts', 'tools-and-attention', 'walking-without-a-goal']) {
   context.location.hash = '#/writing/' + removedId;
   vm.runInContext('route()', context);
   assert.ok(main.innerHTML.includes('404'));
 }
-console.log('PASS: four real articles have no sample notices; three removed sample routes return 404.');
+console.log('PASS: five real articles have no sample notices; three removed sample routes return 404.');
 
 const selfEssay = context.window.SAMPLE.articles.find(a => a.id === 'i-am-good-because-i-am-me');
 assert.ok(selfEssay);
@@ -194,13 +194,13 @@ const temporaryArticles = [
 articleData.push(...temporaryArticles);
 const homeWithFive = vm.runInContext('home()', context);
 assert.equal((homeWithFive.match(/class="writing-row"/g) || []).length, 3);
-assert.ok(homeWithFive.includes('查看全部文章（共 6 篇）'));
+assert.ok(homeWithFive.includes('查看全部文章（共 7 篇）'));
 assert.ok(!homeWithFive.includes('临时文章二'));
 articleData.splice(-temporaryArticles.length, temporaryArticles.length);
 const homeWithThree = vm.runInContext('home()', context);
 assert.equal((homeWithThree.match(/class="writing-row"/g) || []).length, 3);
 assert.ok(homeWithThree.includes('全部文章'));
-assert.ok(homeWithThree.includes('查看全部文章（共 4 篇）'));
+assert.ok(homeWithThree.includes('查看全部文章（共 5 篇）'));
 assert.equal((homeWithThree.match(/class="note"/g) || []).length, 2);
 assert.ok(!homeWithThree.includes('文字持续更新，部分栏目暂保留示例内容。'));
 assert.ok(!homeWithThree.includes('示例关注主题'));
@@ -299,7 +299,7 @@ context.location.hash = "#/writing/china-revolution-leadership";
 vm.runInContext("route()",context);
 for (const p of revolutionOriginal) assert.ok(main.innerHTML.includes(p));
 assert.ok(main.innerHTML.includes("2024.12.14"));
-assert.deepEqual(Array.from(context.window.SAMPLE.articles,a=>a.date),["2026.10.09","2026.10.09","2024.12.14","2024.02.18"]);
+assert.deepEqual(Array.from(context.window.SAMPLE.articles,a=>a.date),["2026.10.09","2026.10.09","2024.12.14","2024.07.28","2024.02.18"]);
 console.log("PASS: revolution essay preserves original text, specified date and article date order.");
 
 const poemOriginal = "终身浪漫的开始，\n\n对我而言，\n\n也许不是心有所属，两情相悦，\n\n这固然令人羡慕，\n\n但爱自己，爱生活，\n\n如此便是一个人，亦是良辰美景，\n\n爱自己才是终身浪漫的开始。";
@@ -313,3 +313,16 @@ assert.ok(main.innerHTML.includes(poemOriginal));
 assert.ok(main.innerHTML.includes('<blockquote class="note-text">'));
 assert.ok(latestCss.includes(".note-text{white-space:pre-wrap}"));
 console.log("PASS: poem preserves seven lines, paragraph breaks and 2026.10.13 date.");
+
+const researchEssay = context.window.SAMPLE.articles.find(a => a.id === "respecting-research-laws");
+assert.equal(researchEssay.title,"如何尊重和顺应科研规律");
+assert.equal(researchEssay.date,"2024.07.28");
+assert.equal(researchEssay.intro,"——读《共同富裕 先富共富的中国梦》第十章第六节有感");
+assert.equal(researchEssay.paragraphs.length,14);
+assert.equal(require("node:crypto").createHash("sha256").update(researchEssay.paragraphs.join("\n\n")).digest("hex"),"0e820fb857ebe393b741423c8bc926812b3900dd4db726579c02cec821c1e7cd");
+context.location.hash = "#/writing/respecting-research-laws";
+vm.runInContext("route()",context);
+assert.ok(main.innerHTML.includes(researchEssay.intro));
+assert.ok(main.innerHTML.includes("2024.07.28"));
+for (const p of researchEssay.paragraphs) assert.ok(main.innerHTML.includes(p));
+console.log("PASS: research essay preserves subtitle, 14 original paragraphs and date 2024.07.28.");
