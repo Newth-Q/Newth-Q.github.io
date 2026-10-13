@@ -20,7 +20,7 @@ vm.createContext(context);
 for (const name of ['content.js', 'app.js']) vm.runInContext(fs.readFileSync(path.join(root, name), 'utf8'), context);
 const cases = [
   ['#/', '认真生活'], ['#/writing', '把想法'],
-  ['#/notes', '未完成'], ['#/notes/0', '若是一个人'],
+  ['#/notes', '未完成'], ['#/notes/0', '共同富裕：公平与效率'],
   ['#/projects', '动手试试'], ['#/about', '自我介绍'],
   ...context.window.SAMPLE.articles.map(a => ['#/writing/' + a.id, a.title]),
   ...context.window.SAMPLE.projects.map(p => ['#/projects/' + p.id, p.title]),
@@ -303,11 +303,12 @@ assert.deepEqual(Array.from(context.window.SAMPLE.articles,a=>a.date),["2026.10.
 console.log("PASS: revolution essay preserves original text, specified date and article date order.");
 
 const poemOriginal = "终身浪漫的开始，\n\n对我而言，\n\n也许不是心有所属，两情相悦，\n\n这固然令人羡慕，\n\n但爱自己，爱生活，\n\n如此便是一个人，亦是良辰美景，\n\n爱自己才是终身浪漫的开始。";
-assert.equal(allNotes[0].tag,"若是一个人");
-assert.equal(allNotes[0].text,poemOriginal);
-assert.equal(vm.runInContext("noteDate(notes[0])",context),"2026.10.13");
-assert.equal(allNotes[0].text.split("\n\n").length,7);
-context.location.hash = "#/notes/0";
+const poemIndex = allNotes.findIndex(n=>n.tag === "若是一个人");
+assert.equal(allNotes[poemIndex].tag,"若是一个人");
+assert.equal(allNotes[poemIndex].text,poemOriginal);
+assert.equal(vm.runInContext("noteDate(notes.find(n=>n.tag === '若是一个人'))",context),"2026.10.13");
+assert.equal(allNotes[poemIndex].text.split("\n\n").length,7);
+context.location.hash = "#/notes/" + poemIndex;
 vm.runInContext("route()",context);
 assert.ok(main.innerHTML.includes(poemOriginal));
 assert.ok(main.innerHTML.includes('<blockquote class="note-text">'));
@@ -326,3 +327,12 @@ assert.ok(main.innerHTML.includes(researchEssay.intro));
 assert.ok(main.innerHTML.includes("2024.07.28"));
 for (const p of researchEssay.paragraphs) assert.ok(main.innerHTML.includes(p));
 console.log("PASS: research essay preserves subtitle, 14 original paragraphs and date 2024.07.28.");
+
+const prosperityText = "改革开放之初，我国的经济发展水平还相当落后，社会生产力极为低下，社会基本矛盾，即人民日益增长的物质文化生活需要同落后的社会生产之间的矛盾尖锐。为尽快摆脱贫困落后的状况，我国及时制定了以经济增长为核心的发展战略，确定了“效率优先，兼顾公平”的分配机制和原则，以发展经济为第一要务，鼓励一部分人先富起来，以先富带动后富，以求最终走上共同富裕之路。\n\n随着国民经济的快速发展，以收入分配失衡为核心的社会公平问题也在不断加剧，经济增长与社会公平之间的矛盾日益尖锐，并已成为当前经济社会发展中不容忽视的重大问题和突出矛盾。\n\n选择恰当的时机将经济工作的重心由“先富”转向“共富”，是改革初期便确立的一项既定发展战略，也是社会主义共同富裕本质的必然要求。\n\n是不是我们居民内部收入分配的差距过大、规则紊乱、激励偏差、不公正和巨量隐匿等问题，在严重地影响着中国的现代化提升进程。\n\n研究收入分配中公平问题的一个前沿概念问题，即“公平感”，这是一个与心理学、行为科学结合在一起的问题，值得我们在考虑推进共同富裕这个命题之下深入思考而推进其研讨。\n\n应鼓励的收入差距还需要有所鼓励，正当的收入差距应尽量容忍，不规范的收入差距要调控抑制，不正当的收入差距则应大力消除，这样才有利于把握好均平与效率的平衡。";
+assert.equal(allNotes[0].text,prosperityText);
+assert.equal(allNotes[0].text.split("\n\n").length,6);
+assert.equal(vm.runInContext("noteDate(notes[0])",context),"2026.10.13");
+context.location.hash = "#/notes/0";
+vm.runInContext("route()",context);
+assert.ok(main.innerHTML.includes(prosperityText));
+console.log("PASS: common prosperity is one note with six original paragraphs and correct date.");
