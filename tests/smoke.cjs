@@ -163,13 +163,13 @@ vm.runInContext('route()', context);
 for (const paragraph of essay.paragraphs) assert.ok(main.innerHTML.includes(paragraph));
 assert.ok(!main.innerHTML.includes('示例文章'));
 assert.ok(!main.innerHTML.includes('class="toc"'));
-assert.equal(context.window.SAMPLE.articles.length, 7);
+assert.equal(context.window.SAMPLE.articles.length, 9);
 for (const removedId of ['a-place-for-thoughts', 'tools-and-attention', 'walking-without-a-goal']) {
   context.location.hash = '#/writing/' + removedId;
   vm.runInContext('route()', context);
   assert.ok(main.innerHTML.includes('404'));
 }
-console.log('PASS: seven real articles have no sample notices; three removed sample routes return 404.');
+console.log('PASS: nine real articles have no sample notices; three removed sample routes return 404.');
 
 const selfEssay = context.window.SAMPLE.articles.find(a => a.id === 'i-am-good-because-i-am-me');
 assert.ok(selfEssay);
@@ -194,13 +194,13 @@ const temporaryArticles = [
 articleData.push(...temporaryArticles);
 const homeWithFive = vm.runInContext('home()', context);
 assert.equal((homeWithFive.match(/class="writing-row"/g) || []).length, 3);
-assert.ok(homeWithFive.includes('查看全部文章（共 9 篇）'));
+assert.ok(homeWithFive.includes('查看全部文章（共 11 篇）'));
 assert.ok(!homeWithFive.includes('临时文章二'));
 articleData.splice(-temporaryArticles.length, temporaryArticles.length);
 const homeWithThree = vm.runInContext('home()', context);
 assert.equal((homeWithThree.match(/class="writing-row"/g) || []).length, 3);
 assert.ok(homeWithThree.includes('全部文章'));
-assert.ok(homeWithThree.includes('查看全部文章（共 7 篇）'));
+assert.ok(homeWithThree.includes('查看全部文章（共 9 篇）'));
 assert.equal((homeWithThree.match(/class="note"/g) || []).length, 2);
 assert.ok(!homeWithThree.includes('文字持续更新，部分栏目暂保留示例内容。'));
 assert.ok(!homeWithThree.includes('示例关注主题'));
@@ -213,7 +213,7 @@ console.log('PASS: homepage caps articles at 3, notes at 2, and removes visible 
 
 const latestCss = fs.readFileSync(path.join(root, 'styles.css'), 'utf8');
 assert.ok(latestCss.includes('.full-notes{width:100%;max-width:none;'));
-assert.ok(finalHtml.includes('styles.css?v=now-height-1'));
+assert.ok(finalHtml.includes('styles.css?v=reading-batch-1'));
 console.log('PASS: notes list is fluid-width with a cache-busted stylesheet.');
 
 const publications = context.window.PUBLICATIONS;
@@ -248,7 +248,7 @@ for (const note of readingNotes) {
   const i = context.window.SAMPLE.notes.findIndex(n => n.tag === note.tag);
   assert.equal(context.window.SAMPLE.notes[i].text, note.text);
   assert.equal(context.window.SAMPLE.notes[i].date, note.date);
-  context.location.hash = "#/notes/" + i;
+  context.location.hash = "#/notes/" + context.window.SAMPLE.notes[i].id;
   vm.runInContext("route()", context);
   assert.ok(main.innerHTML.includes(note.text));
 }
@@ -270,8 +270,8 @@ const allNotes = context.window.SAMPLE.notes;
 assert.equal(allNotes.filter(n => n.year === 2024).length, 6);
 for (const [offset, expected] of grassrootsOriginal.entries()) {
   const index = allNotes.length - 6 + offset;
-  assert.equal(JSON.stringify(allNotes[index]), JSON.stringify(expected));
-  context.location.hash = "#/notes/" + index;
+  assert.equal(JSON.stringify(Object.fromEntries(Object.keys(expected).map(k=>[k,allNotes[index][k]]))), JSON.stringify(expected));
+  context.location.hash = "#/notes/" + allNotes[index].id;
   vm.runInContext("route()", context);
   assert.ok(main.innerHTML.includes(expected.text));
   assert.ok(main.innerHTML.includes("2024.11.05"));
@@ -283,8 +283,8 @@ console.log("PASS: six historical notes preserve original paragraphs, order and 
 for (let i=0;i<allNotes.length;i++) {
   const expectedDate = `${allNotes[i].year || 2026}.${allNotes[i].date}`;
   assert.match(expectedDate, /^\d{4}\.\d{2}\.\d{2}$/);
-  assert.ok(vm.runInContext(`noteCard(notes[${i}],${i})`,context).includes(`class="note-date">${expectedDate}</span>`));
-  context.location.hash = "#/notes/" + i;
+  assert.ok(vm.runInContext(`noteCard(notes[${i}],${i})`,context).includes(`class="note-date">${allNotes[i].dateKind === "published" ? '<span class="date-label">发布于</span>' : ''}${expectedDate}</span>`));
+  context.location.hash = "#/notes/" + context.window.SAMPLE.notes[i].id;
   vm.runInContext("route()",context);
   assert.ok(main.innerHTML.includes(expectedDate));
 }
@@ -299,7 +299,7 @@ context.location.hash = "#/writing/china-revolution-leadership";
 vm.runInContext("route()",context);
 for (const p of revolutionOriginal) assert.ok(main.innerHTML.includes(p));
 assert.ok(main.innerHTML.includes("2024.12.14"));
-assert.deepEqual(Array.from(context.window.SAMPLE.articles,a=>a.date),["2026.10.09","2026.10.09","2024.12.14","2024.07.28","2024.07.17","2024.02.18","2024.01.25"]);
+assert.deepEqual(Array.from(context.window.SAMPLE.articles,a=>a.date),["2026.10.13","2026.10.13","2026.10.09","2026.10.09","2024.12.14","2024.07.28","2024.07.17","2024.02.18","2024.01.25"]);
 console.log("PASS: revolution essay preserves original text, specified date and article date order.");
 
 const poemOriginal = "终身浪漫的开始，\n\n对我而言，\n\n也许不是心有所属，两情相悦，\n\n这固然令人羡慕，\n\n但爱自己，爱生活，\n\n如此便是一个人，亦是良辰美景，\n\n爱自己才是终身浪漫的开始。";
@@ -308,7 +308,7 @@ assert.equal(allNotes[poemIndex].tag,"若是一个人");
 assert.equal(allNotes[poemIndex].text,poemOriginal);
 assert.equal(vm.runInContext("noteDate(notes.find(n=>n.tag === '若是一个人'))",context),"2026.10.13");
 assert.equal(allNotes[poemIndex].text.split("\n\n").length,7);
-context.location.hash = "#/notes/" + poemIndex;
+context.location.hash = "#/notes/" + allNotes[poemIndex].id;
 vm.runInContext("route()",context);
 assert.ok(main.innerHTML.includes(poemOriginal));
 assert.ok(main.innerHTML.includes('<blockquote class="note-text">'));
@@ -329,8 +329,9 @@ for (const p of researchEssay.paragraphs) assert.ok(main.innerHTML.includes(p));
 console.log("PASS: research essay preserves subtitle, 14 original paragraphs and date 2024.07.28.");
 
 const prosperityText = "改革开放之初，我国的经济发展水平还相当落后，社会生产力极为低下，社会基本矛盾，即人民日益增长的物质文化生活需要同落后的社会生产之间的矛盾尖锐。为尽快摆脱贫困落后的状况，我国及时制定了以经济增长为核心的发展战略，确定了“效率优先，兼顾公平”的分配机制和原则，以发展经济为第一要务，鼓励一部分人先富起来，以先富带动后富，以求最终走上共同富裕之路。\n\n随着国民经济的快速发展，以收入分配失衡为核心的社会公平问题也在不断加剧，经济增长与社会公平之间的矛盾日益尖锐，并已成为当前经济社会发展中不容忽视的重大问题和突出矛盾。\n\n选择恰当的时机将经济工作的重心由“先富”转向“共富”，是改革初期便确立的一项既定发展战略，也是社会主义共同富裕本质的必然要求。\n\n是不是我们居民内部收入分配的差距过大、规则紊乱、激励偏差、不公正和巨量隐匿等问题，在严重地影响着中国的现代化提升进程。\n\n研究收入分配中公平问题的一个前沿概念问题，即“公平感”，这是一个与心理学、行为科学结合在一起的问题，值得我们在考虑推进共同富裕这个命题之下深入思考而推进其研讨。\n\n应鼓励的收入差距还需要有所鼓励，正当的收入差距应尽量容忍，不规范的收入差距要调控抑制，不正当的收入差距则应大力消除，这样才有利于把握好均平与效率的平衡。";
-assert.equal(allNotes[0].text,prosperityText);
-assert.equal(allNotes[0].text.split("\n\n").length,6);
+const prosperityIndex = allNotes.findIndex(n=>n.tag === "共同富裕：公平与效率");
+assert.equal(allNotes[prosperityIndex].text,prosperityText);
+assert.equal(allNotes[prosperityIndex].text.split("\n\n").length,6);
 assert.equal(vm.runInContext("noteDate(notes[0])",context),"2026.10.13");
 context.location.hash = "#/notes/0";
 vm.runInContext("route()",context);
@@ -369,3 +370,48 @@ console.log("PASS: respect essay preserves six original paragraphs and 2024.01.2
 
 assert.ok(latestCss.includes(".now{align-self:start;background:var(--surface);padding:25px 28px;"));
 console.log("PASS: focus card aligns to start with content-driven height and retained padding.");
+
+// Reading batch: exact selected content, provenance, dates and stable URLs.
+assert.equal(allNotes.length,21);
+assert.equal(new Set(allNotes.map(n=>n.id)).size,allNotes.length);
+const batchArticleIds = ['inferiority-and-growth','respect-differences'];
+const batchNoteIds = ['reading-honesty-and-respect','reading-small-steps','reading-goals-and-feedback'];
+for (const id of batchArticleIds) {
+  const a = articleData.find(a=>a.id===id);
+  assert.equal(a.dateKind,'published');
+  assert.equal(a.date,'2026.10.13');
+  assert.ok(a.sourceNote.includes('原写作日期不详'));
+  context.location.hash = '#/writing/'+id;
+  vm.runInContext('route()',context);
+  assert.ok(main.innerHTML.includes('发布于 2026.10.13'));
+  assert.ok(main.innerHTML.includes(a.sourceNote));
+}
+for (const id of batchNoteIds) {
+  const n = allNotes.find(n=>n.id===id);
+  assert.equal(n.dateKind,'published');
+  assert.ok(n.sourceNote.includes('原写作日期不详'));
+  context.location.hash = '#/notes/'+id;
+  vm.runInContext('route()',context);
+  assert.ok(main.innerHTML.includes('发布于 2026.10.13'));
+  assert.ok(main.innerHTML.includes(n.sourceNote));
+  if (n.items) { assert.ok(main.innerHTML.includes('<ol>')); for(const item of n.items) assert.ok(main.innerHTML.includes(item)); }
+  else assert.ok(main.innerHTML.includes(n.text));
+}
+// Existing numeric aliases resolve to migration-day content, never new insertions.
+for (const n of allNotes.filter(n=>Number.isInteger(n.legacyIndex))) {
+  context.location.hash = '#/notes/'+n.legacyIndex;
+  vm.runInContext('route()',context);
+  assert.ok(main.innerHTML.includes(n.text));
+}
+allNotes.unshift({id:'temporary-note',date:'10.14',tag:'temporary',text:'temporary'});
+context.location.hash='#/notes/0';vm.runInContext('route()',context);
+assert.ok(main.innerHTML.includes(prosperityText));
+allNotes.shift();
+context.location.hash='#/notes/99999';vm.runInContext('route()',context);assert.ok(main.innerHTML.includes('404'));
+assert.equal(vm.runInContext('sourceNotice({sourceNote:"<script>alert(1)</script>"})',context).includes('<script>'),false);
+{ const item=context.window.SAMPLE.articles.find(x=>x.id==="inferiority-and-growth"); assert.equal(require("node:crypto").createHash("sha256").update(JSON.stringify([item.paragraphs||[],item.sections||[]])).digest("hex"),"ce0facffdb67995d3385392727b49df7348c58a2570d034c2e70caddfcd8baf4"); }
+{ const item=context.window.SAMPLE.articles.find(x=>x.id==="respect-differences"); assert.equal(require("node:crypto").createHash("sha256").update(JSON.stringify([item.paragraphs||[],item.sections||[]])).digest("hex"),"c44fed6961d29a4b5523d611bc7c8dd5b0187dacf15d134eb53ae976138b337d"); }
+{ const item=context.window.SAMPLE.notes.find(x=>x.id==="reading-honesty-and-respect"); assert.equal(require("node:crypto").createHash("sha256").update(JSON.stringify(item.text)).digest("hex"),"b4d1f4e73428b41cc31f9bd6a027324b3d950d6519af47b346575d0015c9f824"); }
+{ const item=context.window.SAMPLE.notes.find(x=>x.id==="reading-small-steps"); assert.equal(require("node:crypto").createHash("sha256").update(JSON.stringify(item.text)).digest("hex"),"61c44d720c75bd3b61f0d57b8c92485b9950f82af8dbd864ae33459e77b6a81b"); }
+{ const item=context.window.SAMPLE.notes.find(x=>x.id==="reading-goals-and-feedback"); assert.equal(require("node:crypto").createHash("sha256").update(JSON.stringify(item.text)).digest("hex"),"1b3ba95686eba67d4b2cad40d39f5dc1697a5daebe31bac1411725fe0be5c501"); }
+console.log("PASS: reading batch preserves selected originals, publication dates, source notices and stable legacy note aliases.");
