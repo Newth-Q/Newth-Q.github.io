@@ -163,13 +163,13 @@ vm.runInContext('route()', context);
 for (const paragraph of essay.paragraphs) assert.ok(main.innerHTML.includes(paragraph));
 assert.ok(!main.innerHTML.includes('示例文章'));
 assert.ok(!main.innerHTML.includes('class="toc"'));
-assert.equal(context.window.SAMPLE.articles.length, 2);
+assert.equal(context.window.SAMPLE.articles.length, 3);
 for (const removedId of ['a-place-for-thoughts', 'tools-and-attention', 'walking-without-a-goal']) {
   context.location.hash = '#/writing/' + removedId;
   vm.runInContext('route()', context);
   assert.ok(main.innerHTML.includes('404'));
 }
-console.log('PASS: two real articles have no sample notices; three removed sample routes return 404.');
+console.log('PASS: three real articles have no sample notices; three removed sample routes return 404.');
 
 const selfEssay = context.window.SAMPLE.articles.find(a => a.id === 'i-am-good-because-i-am-me');
 assert.ok(selfEssay);
@@ -194,16 +194,16 @@ const temporaryArticles = [
 articleData.push(...temporaryArticles);
 const homeWithFive = vm.runInContext('home()', context);
 assert.equal((homeWithFive.match(/class="writing-row"/g) || []).length, 3);
-assert.ok(homeWithFive.includes('查看全部文章（共 4 篇）'));
+assert.ok(homeWithFive.includes('查看全部文章（共 5 篇）'));
 assert.ok(!homeWithFive.includes('临时文章二'));
 articleData.splice(-temporaryArticles.length, temporaryArticles.length);
-const homeWithTwo = vm.runInContext('home()', context);
-assert.equal((homeWithTwo.match(/class="writing-row"/g) || []).length, 2);
-assert.ok(homeWithTwo.includes('全部文章'));
-assert.ok(!homeWithTwo.includes('查看全部文章（共'));
-assert.equal((homeWithTwo.match(/class="note"/g) || []).length, 2);
-assert.ok(!homeWithTwo.includes('文字持续更新，部分栏目暂保留示例内容。'));
-assert.ok(!homeWithTwo.includes('示例关注主题'));
+const homeWithThree = vm.runInContext('home()', context);
+assert.equal((homeWithThree.match(/class="writing-row"/g) || []).length, 3);
+assert.ok(homeWithThree.includes('全部文章'));
+assert.ok(!homeWithThree.includes('查看全部文章（共'));
+assert.equal((homeWithThree.match(/class="note"/g) || []).length, 2);
+assert.ok(!homeWithThree.includes('文字持续更新，部分栏目暂保留示例内容。'));
+assert.ok(!homeWithThree.includes('示例关注主题'));
 const finalHtml = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 assert.ok(finalHtml.includes('<p class="footer-title">很高兴，在这里遇见你。</p>'));
 assert.ok(finalHtml.includes('关于我 ↗'));
@@ -252,3 +252,14 @@ for (const [i, note] of readingNotes.entries()) {
   assert.ok(main.innerHTML.includes(note.text));
 }
 console.log("PASS: three October 13 reading notes preserve original text, dates and render on detail routes.");
+
+const movieEssay = context.window.SAMPLE.articles.find(a => a.id === "article-20");
+assert.equal(movieEssay.title, "第二十条");
+assert.equal(movieEssay.date, "2024.02.18");
+const movieOriginal = ["看了《第二十条》，心情久久不能平静，沉默良久。", "具体来说，整个影片中透露出来的潜规则让我感到绝望，如“什么该说，什么不该说”，“都这么办的，我能怎么办？”，“不求有功，但求无过”等等。影片最后说到“法不能向不法让步”，“法律维护的是公平正义”，这着实值得深思。在我看来，法律维护的并不只是公平正义，更像是一种权衡利弊之后的妥协，或者说，执法部门的执法是政治性，经济性，公平正义等方面博弈之后的产物。", "同样的法规，相似的案件，为什么之前判故意伤害，之后就可以判正当防卫，问题在法律吗？韩明说他相信法律没错，那么谁错了呢？我认为错在执法者执法，执法者也是一个个的人，“不求有功，但求无过“的思想自然会影响到他们的执法办案，所以才会有”之前的怎么办的，之后就怎么办“的现实。而执法者的执法重点会放在哪里呢？事实上就是，上级机关看重哪里，执法重点就会放到哪里。", "影片最后的公平正义的实现，是来自于韩明振聋发聩的演讲，进而引起了执法者的共鸣吗？我觉得不是，更多的是郝秀萍跳楼升级了事件，引发了社会舆论的关注，进一步地，引起了最高检的关注，在最高检的主导下，案件才得以被定性为正当防卫。如果没有最高检的主导和支持，案件能得以改性吗？恐怕很难，剧中的田检、王检、人民督察员以及人大代表等其实并不认可定性为正当防卫。", "再说个例子吧，反腐倡廉是在2013年以后被逐渐提起的，难道2013年以前官员都是清廉的吗？恐怕不是，那为什么2013年以前不能反腐？难道他们没有违法乱纪吗？他们当然违法乱纪了，但2013年以前，上级机关更看重经济发展，更看重GDP，因此在所谓的法律性和经济性之间选择了经济性，因此并非他们不犯法，而是执法者的重点发生了偏移。", "法律判的不是一个个案子，而是一个个人的人生。话虽如此，但我们不能要求每一个执法者都能做到面面俱到，他们也只是生活中的普通人罢了。但执法机关的权力应该得到监督，受人民的监督。执法为民不应该是一句空话，同时，在面对不公的判罚时，人民应该有较小的代价来维护他们的合法权益，绝对不能“谁有钱，谁能耗，谁有理”，现在的多数情况都是，弱势的一方迫于经济成本，时间成本等被迫妥协。法律仍需进步，我们也仍需进步。"];
+assert.equal(JSON.stringify(movieEssay.paragraphs), JSON.stringify(movieOriginal));
+context.location.hash = "#/writing/article-20";
+vm.runInContext("route()", context);
+for (const p of movieOriginal) assert.ok(main.innerHTML.includes(p));
+assert.ok(main.innerHTML.includes("2024.02.18"));
+console.log("PASS: Article 20 preserves all six original paragraphs and specified date.");
