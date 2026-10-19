@@ -163,13 +163,13 @@ vm.runInContext('route()', context);
 for (const paragraph of essay.paragraphs) assert.ok(main.innerHTML.includes(paragraph));
 assert.ok(!main.innerHTML.includes('示例文章'));
 assert.ok(!main.innerHTML.includes('class="toc"'));
-assert.equal(context.window.SAMPLE.articles.length, 9);
+assert.equal(context.window.SAMPLE.articles.length, 10);
 for (const removedId of ['a-place-for-thoughts', 'tools-and-attention', 'walking-without-a-goal']) {
   context.location.hash = '#/writing/' + removedId;
   vm.runInContext('route()', context);
   assert.ok(main.innerHTML.includes('404'));
 }
-console.log('PASS: nine real articles have no sample notices; three removed sample routes return 404.');
+console.log('PASS: ten real articles have no sample notices; three removed sample routes return 404.');
 
 const selfEssay = context.window.SAMPLE.articles.find(a => a.id === 'i-am-good-because-i-am-me');
 assert.ok(selfEssay);
@@ -194,13 +194,13 @@ const temporaryArticles = [
 articleData.push(...temporaryArticles);
 const homeWithFive = vm.runInContext('home()', context);
 assert.equal((homeWithFive.match(/class="writing-row"/g) || []).length, 3);
-assert.ok(homeWithFive.includes('查看全部文章（共 11 篇）'));
+assert.ok(homeWithFive.includes('查看全部文章（共 12 篇）'));
 assert.ok(!homeWithFive.includes('临时文章二'));
 articleData.splice(-temporaryArticles.length, temporaryArticles.length);
 const homeWithThree = vm.runInContext('home()', context);
 assert.equal((homeWithThree.match(/class="writing-row"/g) || []).length, 3);
 assert.ok(homeWithThree.includes('全部文章'));
-assert.ok(homeWithThree.includes('查看全部文章（共 9 篇）'));
+assert.ok(homeWithThree.includes('查看全部文章（共 10 篇）'));
 assert.equal((homeWithThree.match(/class="note"/g) || []).length, 2);
 assert.ok(!homeWithThree.includes('文字持续更新，部分栏目暂保留示例内容。'));
 assert.ok(!homeWithThree.includes('示例关注主题'));
@@ -213,7 +213,7 @@ console.log('PASS: homepage caps articles at 3, notes at 2, and removes visible 
 
 const latestCss = fs.readFileSync(path.join(root, 'styles.css'), 'utf8');
 assert.ok(latestCss.includes('.full-notes{width:100%;max-width:none;'));
-assert.ok(finalHtml.includes('styles.css?v=reading-batch-1'));
+assert.ok(finalHtml.includes('styles.css?v=reading-groups-20261019'));
 console.log('PASS: notes list is fluid-width with a cache-busted stylesheet.');
 
 const publications = context.window.PUBLICATIONS;
@@ -299,7 +299,7 @@ context.location.hash = "#/writing/china-revolution-leadership";
 vm.runInContext("route()",context);
 for (const p of revolutionOriginal) assert.ok(main.innerHTML.includes(p));
 assert.ok(main.innerHTML.includes("2024.12.14"));
-assert.deepEqual(Array.from(context.window.SAMPLE.articles,a=>a.date),["2026.10.13","2026.10.13","2026.10.09","2026.10.09","2024.12.14","2024.07.28","2024.07.17","2024.02.18","2024.01.25"]);
+assert.deepEqual(Array.from(context.window.SAMPLE.articles,a=>a.date),["2026.10.19","2026.10.13","2026.10.13","2026.10.09","2026.10.09","2024.12.14","2024.07.28","2024.07.17","2024.02.18","2024.01.25"]);
 console.log("PASS: revolution essay preserves original text, specified date and article date order.");
 
 const poemOriginal = "终身浪漫的开始，\n\n对我而言，\n\n也许不是心有所属，两情相悦，\n\n这固然令人羡慕，\n\n但爱自己，爱生活，\n\n如此便是一个人，亦是良辰美景，\n\n爱自己才是终身浪漫的开始。";
@@ -332,7 +332,7 @@ const prosperityText = "改革开放之初，我国的经济发展水平还相�
 const prosperityIndex = allNotes.findIndex(n=>n.tag === "共同富裕：公平与效率");
 assert.equal(allNotes[prosperityIndex].text,prosperityText);
 assert.equal(allNotes[prosperityIndex].text.split("\n\n").length,6);
-assert.equal(vm.runInContext("noteDate(notes[0])",context),"2026.10.13");
+assert.equal(vm.runInContext("noteDate(notes.find(n=>n.id==='note-legacy-0'))",context),"2026.10.13");
 context.location.hash = "#/notes/0";
 vm.runInContext("route()",context);
 assert.ok(main.innerHTML.includes(prosperityText));
@@ -372,7 +372,7 @@ assert.ok(latestCss.includes(".now{align-self:start;background:var(--surface);pa
 console.log("PASS: focus card aligns to start with content-driven height and retained padding.");
 
 // Reading batch: exact selected content, provenance, dates and stable URLs.
-assert.equal(allNotes.length,21);
+assert.equal(allNotes.length,54);
 assert.equal(new Set(allNotes.map(n=>n.id)).size,allNotes.length);
 const batchArticleIds = ['inferiority-and-growth','respect-differences'];
 const batchNoteIds = ['reading-honesty-and-respect','reading-small-steps','reading-goals-and-feedback'];
@@ -421,3 +421,46 @@ for (const hash of ['#/','#/notes','#/writing',...batchArticleIds.map(id=>'#/wri
   for(const text of ['原写作日期不详','引语归属尚未核实','未作原书逐字引文核验','根据个人《自卑与超越》阅读笔记整理']) assert.ok(!main.innerHTML.includes(text));
 }
 console.log('PASS: editorial notices removed across homepage, lists and reading detail pages.');
+
+// Batch 2: every imported item retains its text and a permanent URL.
+const importedNoteIds = ["reading-not-cheating-01", "reading-not-cheating-02", "reading-not-cheating-03", "reading-not-cheating-04", "reading-not-cheating-05", "reading-not-cheating-06", "reading-not-cheating-07", "reading-not-cheating-08", "reading-not-cheating-09", "reading-not-cheating-10", "reading-not-cheating-11", "reading-not-cheating-12", "reading-not-cheating-13", "reading-not-cheating-14", "reading-not-cheating-15", "reading-not-cheating-16", "reading-not-cheating-17", "reading-talk-01", "reading-talk-02", "reading-talk-03", "reading-talk-05", "reading-talk-06", "reading-talk-07", "reading-talk-08", "reading-talk-09", "reading-talk-10", "reading-medical-00", "reading-medical-01", "reading-medical-02", "reading-medical-03", "reading-medical-04", "reading-medical-05", "reading-medical-06"];
+const importedHashes = {"reading-not-cheating-01": "7e3d3ba20a3bcfa835ea65d94644268b45594a61d7764297c3110abdf0e9662d", "reading-not-cheating-02": "11ee602573a15aaeadaeb67c564fec17fecdde9e9bf91a9393cb3c2e0dc67e71", "reading-not-cheating-03": "d244a2b15791814bc499da478ab9ab8edf41a0621fbfcea3c3fed5ebb4ebc804", "reading-not-cheating-04": "5d25e46819cd861f0dc116df7b4791178e6b7d87710380330ea0d07a02ce7c90", "reading-not-cheating-05": "8b16a7da3b62272e7788c2b8e5617be0bb545ed1d295c0a06bae62838b514e70", "reading-not-cheating-06": "27ae4971652744770cbef4b897782d974ead8e89cc6f3c4e9d608912ea854e69", "reading-not-cheating-07": "a730bc4d894e657f9ff6c401c16c55acfc7119f23d7ea6976c7a7fb0fe0fe703", "reading-not-cheating-08": "fb53019a362dee3e6f542d6492e4b27ff1cd60c9570e9849705644beffa6861c", "reading-not-cheating-09": "de3c583db278ab048a268824a34b8e28f195b32ebc4b11dad47fdb35ca54228f", "reading-not-cheating-10": "23bcb2272c5311c3d06f838730b1c56bcfc07486ca8c2c78e3c55ee7e20ddb0b", "reading-not-cheating-11": "3d8a1e2d4fb22428143264d7e806bea955ab6397dbed24cdaebc6f11659e0e74", "reading-not-cheating-12": "a173004700be44b6771654fa2ccef6b7999bc340b5dab2fe9c33371c73dfb4ad", "reading-not-cheating-13": "ca1b9ab320422787a0a3cb1be0dadb798b5bbfd2d556824d2c08e958b1df9c07", "reading-not-cheating-14": "ed7ecb1f55e48358a32800efe03520ffa08e5acdcbd0c7f8f1666d367716002e", "reading-not-cheating-15": "dd1bb0dbb54cc332cbf2af645894f74bd66597d973c468a89d71861e088f766e", "reading-not-cheating-16": "f0025f1b3d07383300595d0516c9be9723bf9dd5cc2a21a80c89f8c1c1cd6e19", "reading-not-cheating-17": "0679226a74e84048948fdcc82902d236cec6f8f3de823a2e66241c4868dea19e", "reading-talk-01": "e7d1d630ec3516dc5b44186b948220ebda577316a89041f4b4d774d832d8a367", "reading-talk-02": "f9b38df032b6e7991f59a9e6d1576123f1fb026943f2a95bd7d92ef192c40944", "reading-talk-03": "f476157389b811b62e59c58c02e39321a5c4479b8f117c77ab9ddc5b1ca4dec8", "reading-talk-05": "41d880e6232005e1e60f7c2defcd1a31ae160eb4715d3ab983571f2e6e59c66c", "reading-talk-06": "6d995d6f77e85d93c0121ecb677bf669918a3ce585899b33f29b0f7edcf4b6c5", "reading-talk-07": "d674aa9fc980a28544d90edf29ec005e0e8ef4fe35f3f211dbd239606ed2b21b", "reading-talk-08": "ef1bc4224a92598ad6b94f0800c4edbd95548d72871a4d6449ee708e9113c91d", "reading-talk-09": "8689348b0c48255c4c8a5c01bc94ede203c5998d98b89036b04239b961626a9d", "reading-talk-10": "6cdc03fb99dae27cc284c8087286bf69435f97ac90a1a05f377285ba413ab50e", "reading-medical-00": "9ac366b6ea6d14bc61dcdd0ff68eead02a0c7434d9cf8c5f774c1c2271898936", "reading-medical-01": "8208f69a5945f19d001331a927d55624c65da70df6d02f279f72706c81cf345b", "reading-medical-02": "490acfe08ab8053f371c7457d112ddde19755194dee2d91c9c301220d5a4ab75", "reading-medical-03": "0dfb84c513b0e1e71d8ae327be2652fa74adf0885ea447beec528adac1f2b4e6", "reading-medical-04": "3472cf2dc84e096f011c83f85e456d21e9ba3e568e515a62e63e9c3b81c8b580", "reading-medical-05": "fceeb15ca5a3581d5a10706d66602a2513a53279a9b67a99a175520b98feb5f3", "reading-medical-06": "405cf8955b72f8976aed07ebb3b5566bc729a4557f043e69ae7a71b19015445a"};
+assert.equal(importedNoteIds.length,33);
+for(const id of importedNoteIds){
+  const n=allNotes.find(n=>n.id===id);
+  assert.ok(n);assert.equal(n.dateKind,'published');assert.equal(n.date,'10.19');assert.equal(n.year,2026);
+  assert.equal(require('node:crypto').createHash('sha256').update(n.text).digest('hex'),importedHashes[id]);
+  context.location.hash='#/notes/'+id;vm.runInContext('route()',context);
+  assert.ok(main.innerHTML.includes(n.text));assert.ok(main.innerHTML.includes('发布于 2026.10.19'));
+  assert.ok(main.innerHTML.includes(n.book));
+  if(n.topic==='health')assert.ok(main.innerHTML.includes('勿据阅读笔记自行停药'));
+}
+const topics=vm.runInContext('noteTopics',context);
+assert.equal(topics.length,5);
+assert.equal(allNotes.filter(n=>n.book==='也许你该找个人聊聊').length,10);
+assert.equal(allNotes.filter(n=>n.text===allNotes.find(x=>x.id==='reading-small-steps').text).length,1);
+assert.equal(allNotes.filter(n=>n.topic==='health').length,7);
+assert.equal(new Set(allNotes.map(n=>n.text)).size,allNotes.length);
+assert.ok(allNotes.every(n=>topics.some(t=>t.id===n.topic)));
+context.location.hash='#/notes';vm.runInContext('route()',context);
+assert.equal((main.innerHTML.match(/class="notes-group"/g)||[]).length,5);
+assert.equal((main.innerHTML.match(/class="note"/g)||[]).length,allNotes.length);
+assert.ok(main.innerHTML.includes('阅读全文'));
+for(const topic of topics){
+  context.location.hash='#/notes/category/'+topic.id;vm.runInContext('route()',context);
+  assert.equal((main.innerHTML.match(/class="notes-group"/g)||[]).length,1);
+  assert.equal((main.innerHTML.match(/class="note"/g)||[]).length,allNotes.filter(n=>n.topic===topic.id).length);
+  assert.ok(main.innerHTML.includes('href="#/notes/category/'+topic.id+'" aria-current="page"'));
+  for(const n of allNotes)assert.equal(main.innerHTML.includes('href="#/notes/'+n.id+'"'),n.topic===topic.id);
+}
+for(const hash of ['#/notes/category/invalid','#/notes/category','#/notes/category/self/extra']){
+  context.location.hash=hash;vm.runInContext('route()',context);assert.ok(main.innerHTML.includes('404'));
+}
+const qingEssay=articleData.find(a=>a.id==='late-qing-state-transformation');
+assert.equal(qingEssay.date,'2026.10.19');assert.equal(qingEssay.dateKind,'published');assert.equal(qingEssay.sections.length,5);
+assert.ok(!JSON.stringify(qingEssay).includes('~~'));
+context.location.hash='#/writing/'+qingEssay.id;vm.runInContext('route()',context);
+for(const text of [...qingEssay.paragraphs,...qingEssay.sections.flat()])assert.ok(main.innerHTML.includes(text));
+assert.ok(main.innerHTML.includes('发布于 2026.10.19'));
+assert.equal(vm.runInContext('noteCard({id:"x",date:"10.19",tag:"<script>",text:"<img src=x>",book:"<b>"},0,true)',context).includes('<img'),false);
+console.log('PASS: 33 new notes, 5 exclusive groups and filters, complete text, duplicate avoidance, historical aliases and edited Qing article.');
