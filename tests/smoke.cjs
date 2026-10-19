@@ -380,20 +380,20 @@ for (const id of batchArticleIds) {
   const a = articleData.find(a=>a.id===id);
   assert.equal(a.dateKind,'published');
   assert.equal(a.date,'2026.10.13');
-  assert.ok(a.sourceNote.includes('原写作日期不详'));
+  assert.equal(a.sourceNote,undefined);
   context.location.hash = '#/writing/'+id;
   vm.runInContext('route()',context);
   assert.ok(main.innerHTML.includes('发布于 2026.10.13'));
-  assert.ok(main.innerHTML.includes(a.sourceNote));
+  assert.ok(!main.innerHTML.includes('class="reading-source"'));
 }
 for (const id of batchNoteIds) {
   const n = allNotes.find(n=>n.id===id);
   assert.equal(n.dateKind,'published');
-  assert.ok(n.sourceNote.includes('原写作日期不详'));
+  assert.equal(n.sourceNote,undefined);
   context.location.hash = '#/notes/'+id;
   vm.runInContext('route()',context);
   assert.ok(main.innerHTML.includes('发布于 2026.10.13'));
-  assert.ok(main.innerHTML.includes(n.sourceNote));
+  assert.ok(!main.innerHTML.includes('class="reading-source"'));
   if (n.items) { assert.ok(main.innerHTML.includes('<ol>')); for(const item of n.items) assert.ok(main.innerHTML.includes(item)); }
   else assert.ok(main.innerHTML.includes(n.text));
 }
@@ -414,4 +414,10 @@ assert.equal(vm.runInContext('sourceNotice({sourceNote:"<script>alert(1)</script
 { const item=context.window.SAMPLE.notes.find(x=>x.id==="reading-honesty-and-respect"); assert.equal(require("node:crypto").createHash("sha256").update(JSON.stringify(item.text)).digest("hex"),"b4d1f4e73428b41cc31f9bd6a027324b3d950d6519af47b346575d0015c9f824"); }
 { const item=context.window.SAMPLE.notes.find(x=>x.id==="reading-small-steps"); assert.equal(require("node:crypto").createHash("sha256").update(JSON.stringify(item.text)).digest("hex"),"61c44d720c75bd3b61f0d57b8c92485b9950f82af8dbd864ae33459e77b6a81b"); }
 { const item=context.window.SAMPLE.notes.find(x=>x.id==="reading-goals-and-feedback"); assert.equal(require("node:crypto").createHash("sha256").update(JSON.stringify(item.text)).digest("hex"),"1b3ba95686eba67d4b2cad40d39f5dc1697a5daebe31bac1411725fe0be5c501"); }
-console.log("PASS: reading batch preserves selected originals, publication dates, source notices and stable legacy note aliases.");
+console.log("PASS: reading batch preserves selected originals, publication dates and stable legacy note aliases without editorial notices.");
+
+for (const hash of ['#/','#/notes','#/writing',...batchArticleIds.map(id=>'#/writing/'+id),...batchNoteIds.map(id=>'#/notes/'+id)]) {
+  context.location.hash=hash; vm.runInContext('route()',context);
+  for(const text of ['原写作日期不详','引语归属尚未核实','未作原书逐字引文核验','根据个人《自卑与超越》阅读笔记整理']) assert.ok(!main.innerHTML.includes(text));
+}
+console.log('PASS: editorial notices removed across homepage, lists and reading detail pages.');
