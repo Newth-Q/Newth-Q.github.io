@@ -19,9 +19,9 @@ const context = {
 vm.createContext(context);
 for (const name of ['content.js', 'app.js']) vm.runInContext(fs.readFileSync(path.join(root, name), 'utf8'), context);
 const cases = [
-  ['#/', '认真生活'], ['#/writing', '把想法'],
-  ['#/notes', '未完成'], ['#/notes/0', '共同富裕：公平与效率'],
-  ['#/projects', '动手试试'], ['#/about', '自我介绍'],
+  ['#/', '认真生活'], ['#/writing', '<h1>文章</h1>'],
+  ['#/notes', '<h1>随想</h1>'], ['#/notes/0', '共同富裕：公平与效率'],
+  ['#/projects', '<h1>实践</h1>'], ['#/about', '自我介绍'],
   ...context.window.SAMPLE.articles.map(a => ['#/writing/' + a.id, a.title]),
   ...context.window.SAMPLE.projects.map(p => ['#/projects/' + p.id, p.title]),
   ['#/missing', '404'], ['#/notes/no', '404'],
@@ -213,7 +213,7 @@ console.log('PASS: homepage caps articles at 3, notes at 2, and removes visible 
 
 const latestCss = fs.readFileSync(path.join(root, 'styles.css'), 'utf8');
 assert.ok(latestCss.includes('.full-notes{width:100%;max-width:none;'));
-assert.ok(finalHtml.includes('styles.css?v=reading-groups-20261019'));
+assert.ok(finalHtml.includes('styles.css?v=clean-reading-20261105'));
 console.log('PASS: notes list is fluid-width with a cache-busted stylesheet.');
 
 const publications = context.window.PUBLICATIONS;
@@ -283,7 +283,7 @@ console.log("PASS: six historical notes preserve original paragraphs, order and 
 for (let i=0;i<allNotes.length;i++) {
   const expectedDate = `${allNotes[i].year || 2026}.${allNotes[i].date}`;
   assert.match(expectedDate, /^\d{4}\.\d{2}\.\d{2}$/);
-  assert.ok(vm.runInContext(`noteCard(notes[${i}],${i})`,context).includes(`class="note-date">${allNotes[i].dateKind === "published" ? '<span class="date-label">发布于</span>' : ''}${expectedDate}</span>`));
+  assert.ok(vm.runInContext(`noteCard(notes[${i}],${i})`,context).includes(`class="note-date">${expectedDate}</span>`));
   context.location.hash = "#/notes/" + context.window.SAMPLE.notes[i].id;
   vm.runInContext("route()",context);
   assert.ok(main.innerHTML.includes(expectedDate));
@@ -372,7 +372,7 @@ assert.ok(latestCss.includes(".now{align-self:start;background:var(--surface);pa
 console.log("PASS: focus card aligns to start with content-driven height and retained padding.");
 
 // Reading batch: exact selected content, provenance, dates and stable URLs.
-assert.equal(allNotes.length,54);
+assert.equal(allNotes.length,55);
 assert.equal(new Set(allNotes.map(n=>n.id)).size,allNotes.length);
 const batchArticleIds = ['inferiority-and-growth','respect-differences'];
 const batchNoteIds = ['reading-honesty-and-respect','reading-small-steps','reading-goals-and-feedback'];
@@ -383,7 +383,7 @@ for (const id of batchArticleIds) {
   assert.equal(a.sourceNote,undefined);
   context.location.hash = '#/writing/'+id;
   vm.runInContext('route()',context);
-  assert.ok(main.innerHTML.includes('发布于 2026.10.13'));
+  assert.ok(main.innerHTML.includes('2026.10.13'));
   assert.ok(!main.innerHTML.includes('class="reading-source"'));
 }
 for (const id of batchNoteIds) {
@@ -392,7 +392,7 @@ for (const id of batchNoteIds) {
   assert.equal(n.sourceNote,undefined);
   context.location.hash = '#/notes/'+id;
   vm.runInContext('route()',context);
-  assert.ok(main.innerHTML.includes('发布于 2026.10.13'));
+  assert.ok(main.innerHTML.includes('2026.10.13'));
   assert.ok(!main.innerHTML.includes('class="reading-source"'));
   if (n.items) { assert.ok(main.innerHTML.includes('<ol>')); for(const item of n.items) assert.ok(main.innerHTML.includes(item)); }
   else assert.ok(main.innerHTML.includes(n.text));
@@ -431,8 +431,8 @@ for(const id of importedNoteIds){
   assert.ok(n);assert.equal(n.dateKind,'published');assert.equal(n.date,'10.19');assert.equal(n.year,2026);
   assert.equal(require('node:crypto').createHash('sha256').update(n.text).digest('hex'),importedHashes[id]);
   context.location.hash='#/notes/'+id;vm.runInContext('route()',context);
-  assert.ok(main.innerHTML.includes(n.text));assert.ok(main.innerHTML.includes('发布于 2026.10.19'));
-  assert.ok(main.innerHTML.includes(n.book));
+  assert.ok(main.innerHTML.includes(n.text));assert.ok(main.innerHTML.includes('2026.10.19'));
+  assert.ok(!main.innerHTML.includes('class="note-book"'));
   if(n.topic==='health')assert.ok(main.innerHTML.includes('勿据阅读笔记自行停药'));
 }
 const topics=vm.runInContext('noteTopics',context);
@@ -443,15 +443,16 @@ assert.equal(allNotes.filter(n=>n.topic==='health').length,7);
 assert.equal(new Set(allNotes.map(n=>n.text)).size,allNotes.length);
 assert.ok(allNotes.every(n=>topics.some(t=>t.id===n.topic)));
 context.location.hash='#/notes';vm.runInContext('route()',context);
-assert.equal((main.innerHTML.match(/class="notes-group"/g)||[]).length,5);
+assert.equal((main.innerHTML.match(/class="notes-group"/g)||[]).length,0);
 assert.equal((main.innerHTML.match(/class="note"/g)||[]).length,allNotes.length);
-assert.ok(main.innerHTML.includes('阅读全文'));
+assert.ok(main.innerHTML.includes('继续阅读 →'));
+// Legacy category URLs remain valid, but now show the unclassified full list.
 for(const topic of topics){
   context.location.hash='#/notes/category/'+topic.id;vm.runInContext('route()',context);
-  assert.equal((main.innerHTML.match(/class="notes-group"/g)||[]).length,1);
-  assert.equal((main.innerHTML.match(/class="note"/g)||[]).length,allNotes.filter(n=>n.topic===topic.id).length);
-  assert.ok(main.innerHTML.includes('href="#/notes/category/'+topic.id+'" aria-current="page"'));
-  for(const n of allNotes)assert.equal(main.innerHTML.includes('href="#/notes/'+n.id+'"'),n.topic===topic.id);
+  assert.equal((main.innerHTML.match(/class="notes-group"/g)||[]).length,0);
+  assert.equal((main.innerHTML.match(/class="note"/g)||[]).length,allNotes.length);
+  assert.ok(!main.innerHTML.includes('note-filters'));
+  for(const n of allNotes)assert.ok(main.innerHTML.includes('href="#/notes/'+n.id+'"'));
 }
 for(const hash of ['#/notes/category/invalid','#/notes/category','#/notes/category/self/extra']){
   context.location.hash=hash;vm.runInContext('route()',context);assert.ok(main.innerHTML.includes('404'));
@@ -461,6 +462,71 @@ assert.equal(qingEssay.date,'2026.10.19');assert.equal(qingEssay.dateKind,'publi
 assert.ok(!JSON.stringify(qingEssay).includes('~~'));
 context.location.hash='#/writing/'+qingEssay.id;vm.runInContext('route()',context);
 for(const text of [...qingEssay.paragraphs,...qingEssay.sections.flat()])assert.ok(main.innerHTML.includes(text));
-assert.ok(main.innerHTML.includes('发布于 2026.10.19'));
+assert.ok(main.innerHTML.includes('2026.10.19'));
 assert.equal(vm.runInContext('noteCard({id:"x",date:"10.19",tag:"<script>",text:"<img src=x>",book:"<b>"},0,true)',context).includes('<img'),false);
-console.log('PASS: 33 new notes, 5 exclusive groups and filters, complete text, duplicate avoidance, historical aliases and edited Qing article.');
+console.log('PASS: 33 new notes, unclassified list and legacy category aliases, complete text, duplicate avoidance, historical aliases and edited Qing article.');
+
+// Reading-space redesign: preserve content tests above and verify enhancement wiring.
+const design = fs.readFileSync(path.join(root, 'design.css'), 'utf8');
+const reader = fs.readFileSync(path.join(root, 'reader.js'), 'utf8');
+assert.ok(html.includes('design.css?v=clean-reading-20261105'));
+assert.ok(html.includes('reader.js?v=clean-reading-20261105'));
+assert.ok(html.indexOf('reader.js?') < html.indexOf('app.js?'));
+assert.ok(design.includes('column-count:2'));
+assert.ok(design.includes('@media(max-width:760px)'));
+assert.ok(design.includes('@media print'));
+assert.ok(reader.includes('ResizeObserver'));
+assert.ok(reader.includes("media.addEventListener('change',applyMode)"));
+assert.ok(reader.includes('reader-pages-status'));
+context.location.hash = '#/';vm.runInContext('route()', context);
+assert.ok(main.innerHTML.includes('class="home-intro"'));
+assert.ok(main.innerHTML.includes('assets/reading-room.webp'));
+assert.ok(fs.statSync(path.join(root,'assets/reading-room.webp')).size < 600000);
+assert.ok(!main.innerHTML.includes('class="journal"'));
+console.log('PASS: reading-space assets, home layout, reader wiring and responsive/print styles.');
+
+assert.ok(reader.includes('notes-reader full-notes'));
+assert.ok(reader.includes('qi-notes-reading-mode'));
+assert.ok(design.includes('.notes-reader.reader-book .notes-group{display:contents}'));
+console.log('PASS: shared reader supports continuous notes pagination with independent reading preference.');
+
+// Display refinement: plain dates, calculated reading stats, conditional continuation.
+for(const hash of ['#/','#/writing','#/notes',...articleData.map(a=>'#/writing/'+a.id),...allNotes.map(n=>'#/notes/'+n.id)]){
+  context.location.hash=hash;vm.runInContext('route()',context);
+  assert.ok(!main.innerHTML.includes('发布于'),hash+' plain date');
+  assert.ok(!main.innerHTML.includes('class="category"'),hash+' article category');
+  assert.ok(!main.innerHTML.includes('data-filter='),hash+' filter');
+  assert.ok(!main.innerHTML.includes('reading-kind'),hash+' note kind');
+  assert.ok(!main.innerHTML.includes('查看同类随想'),hash+' related topic');
+}
+for(const n of allNotes){
+  context.testNote=n;
+  const rendered=vm.runInContext('noteCard(testNote,0,true)',context);
+  assert.equal(rendered.includes('class="tag"'),n.text.length>220,n.id);
+  assert.equal(rendered.includes('继续阅读 →'),n.text.length>220,n.id);
+  assert.ok(!rendered.includes('查看随想'));
+}
+assert.equal(vm.runInContext('articleStats({paragraphs:["你好，世界！ Hello world 2026"],sections:[]})',context),'7 字 · 约 1 分钟');
+assert.equal(vm.runInContext('articleStats({paragraphs:["中".repeat(601)],sections:[]})',context),'601 字 · 约 3 分钟');
+for(const a of articleData){
+  context.testArticle=a;
+  const stats=vm.runInContext('articleStats(testArticle)',context);
+  assert.ok(vm.runInContext('articleRow(testArticle)',context).includes(stats));
+  assert.ok(vm.runInContext('article(testArticle)',context).includes(stats));
+}
+console.log('PASS: plain dates on all content routes, no categories, conditional note links and calculated article statistics.');
+
+// Book metadata stays in the data, not as a note subtitle on any surface.
+for(const hash of ['#/','#/notes',...allNotes.map(n=>'#/notes/'+n.id)]){
+  context.location.hash=hash;vm.runInContext('route()',context);
+  assert.ok(!main.innerHTML.includes('class="note-book"'),hash+' no book subtitle');
+}
+console.log('PASS: no book subtitles on home, notes list or note details.');
+
+const laborNote=allNotes.find(n=>n.id==='school-mental-and-manual-labor');
+assert.equal(laborNote.text,"现在的学校制度是精神劳动和体力劳动分离到极致的一种制度。有力量进学校受教育的，就是并不想贪懒，也只做一点精神劳动的工作；实际上是否有益于大众，实在很难查考。一切体力劳动的工作呢，专由无缘进学校的大多数人去担任，而这些体力劳动的工作却是社会的支柱，必不可缺少的。");
+assert.equal(laborNote.date,"11.05");assert.equal(laborNote.year,2026);assert.equal(laborNote.dateKind,"published");
+assert.equal(allNotes[0].id,laborNote.id);
+context.location.hash="#/notes/"+laborNote.id;vm.runInContext("route()",context);
+assert.ok(main.innerHTML.includes(laborNote.text));assert.ok(main.innerHTML.includes("2026.11.05"));
+console.log("PASS: new labor note preserves exact supplied text, publication date and stable ID.");
